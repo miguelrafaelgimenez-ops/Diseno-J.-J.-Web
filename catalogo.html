@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo Digital | Diseño J. J. — Somos tu aliado creativo</title>
+  <meta name="description"
+    content="Catálogo digital de Diseño J. J. — Equipos, insumos, combos de sublimación, grabado láser y paquetes digitales." />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       VARIABLES Y RESET
+       ========================================================================== */
+    :root {
+      --bg-dark: #040714;
+      --bg-primary: #070d1e;
+      --bg-secondary: #0b142d;
+      --bg-card: rgba(11, 20, 45, 0.8);
+      --bg-card-hover: rgba(16, 29, 64, 0.95);
+
+      --color-electric-blue: #00d2ff;
+      --color-primary-blue: #0066ff;
+      --color-gold: #e5b869;
+
+      --text-white: #ffffff;
+      --text-light: #f1f5f9;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+
+      --border-subtle: rgba(0, 210, 255, 0.16);
+      --border-highlight: rgba(0, 210, 255, 0.45);
+
+      --glow-blue: 0 0 22px rgba(0, 210, 255, 0.32);
+      --shadow-card: 0 8px 24px -6px rgba(0, 0, 0, 0.6);
+
+      --font-heading: 'Outfit', system-ui, sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: var(--font-body);
+      line-height: 1.55;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 100vh;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 90% 35%, rgba(0, 210, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 10% 75%, rgba(0, 102, 255, 0.06) 0%, transparent 45%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    img,
+    svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 0 clamp(1.25rem, 3.5vw, 2.5rem);
+      position: relative;
+      z-index: 1;
+    }
+
+    .section {
+      padding: clamp(2.5rem, 4.5vw, 4rem) 0;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       BOTONES
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      padding: 0.75rem 1.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--color-electric-blue) 0%, var(--color-primary-blue) 100%);
+      color: #040915;
+      box-shadow: var(--glow-blue);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 210, 255, 0.5);
+      color: #020610;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-white);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 210, 255, 0.12);
+      border-color: var(--color-electric-blue);
+      color: var(--color-electric-blue);
+      transform: translateY(-2px);
+    }
+
+    .btn-whatsapp {
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(37, 211, 102, 0.35);
+    }
+
+    .btn-whatsapp:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5);
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       NAVBAR
+       ========================================================================== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0.9rem 0;
+      background: rgba(4, 7, 20, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: all var(--transition);
+    }
+
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      z-index: 1001;
+    }
+
+    .logo-img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(0, 210, 255, 0.4));
+    }
+
+    .logo-name {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--text-white);
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 1.65rem;
+    }
+
+    .nav-link {
+      font-size: 0.925rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      position: relative;
+      padding: 0.25rem 0;
+      transition: color var(--transition);
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--text-white);
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--color-electric-blue);
+      transition: width var(--transition);
+    }
+
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: 100%;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      z-index: 1001;
+      gap: 5px;
+    }
+
+    .hamburger-line {
+      width: 20px;
+      height: 2px;
+      background-color: var(--text-white);
+      transition: all var(--transition);
+    }
+
+    .hamburger.is-active .hamburger-line:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+      background-color: var(--color-electric-blue);
+    }
+
+    .hamburger.is-active .hamburger-line:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.is-active .hamburger-line:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+      background-color: var(--color-electric-blue);
+    }
+
+    /* ==========================================================================
+       ENCABEZADO DEL CATÁLOGO
+       ========================================================================== */
+    .catalog-header {
+      padding-top: calc(65px + 2rem);
+      padding-bottom: 1.5rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .catalog-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.9rem;
+      border-radius: var(--radius-full);
+      background: rgba(0, 210, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      color: var(--color-electric-blue);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .catalog-title {
+      font-family: var(--font-heading);
+      font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+      font-weight: 900;
+      color: var(--text-white);
+      line-height: 1.08;
+      margin-bottom: 0.2rem;
+    }
+
+    .catalog-brand {
+      font-family: var(--font-heading);
+      font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+      font-weight: 700;
+      color: var(--color-electric-blue);
+      margin-bottom: 0.5rem;
+    }
+
+    .catalog-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       FILTROS DE CATEGORÍAS
+       ========================================================================== */
+    .filter-container {
+      margin: 2rem 0 2.5rem 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .filter-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      max-width: 100%;
+    }
+
+    .filter-btn {
+      padding: 0.55rem 1.25rem;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .filter-btn:hover {
+      background: rgba(0, 210, 255, 0.12);
+      border-color: var(--color-electric-blue);
+      color: var(--text-white);
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, var(--color-electric-blue) 0%, var(--color-primary-blue) 100%);
+      color: #040915;
+      border-color: transparent;
+      font-weight: 700;
+      box-shadow: 0 0 18px rgba(0, 210, 255, 0.38);
+    }
+
+    /* ==========================================================================
+       GALERÍA CUADRÍCULA (4 COLUMNAS DESKTOP)
+       ========================================================================== */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      min-height: 380px;
+    }
+
+    .gallery-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--border-highlight);
+      box-shadow: 0 12px 30px rgba(0, 210, 255, 0.22);
+    }
+
+    .gallery-img-box {
+      width: 100%;
+      aspect-ratio: 4 / 4.7;
+      background: #020612;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.45s ease;
+    }
+
+    .gallery-card:hover .gallery-img {
+      transform: scale(1.04);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 20, 0.88) 85%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.15rem;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .gallery-card:hover .gallery-overlay {
+      opacity: 1;
+    }
+
+    .gallery-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-electric-blue);
+      margin-bottom: 0.25rem;
+    }
+
+    .gallery-title {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 0.5rem;
+      line-height: 1.25;
+    }
+
+    .gallery-zoom-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #040915;
+      background: var(--color-electric-blue);
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-full);
+      align-self: flex-start;
+    }
+
+    .gallery-card-caption {
+      padding: 0.9rem 1.1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .gallery-caption-title {
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .gallery-caption-cat {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+
+    /* ==========================================================================
+       LIGHTBOX / VISOR MODAL
+       ========================================================================== */
+    .lightbox-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 16, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+    }
+
+    .lightbox-modal.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox-container {
+      position: relative;
+      max-width: 980px;
+      width: 100%;
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-highlight);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+      transform: scale(0.94);
+      transition: transform var(--transition);
+    }
+
+    .lightbox-modal.is-open .lightbox-container {
+      transform: scale(1);
+    }
+
+    .lightbox-close-btn {
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.2s ease;
+    }
+
+    .lightbox-close-btn:hover {
+      background: var(--color-electric-blue);
+      color: #040915;
+      transform: rotate(90deg);
+    }
+
+    .lightbox-media-wrapper {
+      position: relative;
+      width: 100%;
+      min-height: 250px;
+      max-height: 68vh;
+      background: #02040a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-media {
+      max-width: 100%;
+      max-height: 68vh;
+      object-fit: contain;
+      padding: 0.5rem;
+    }
+
+    .lightbox-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(4, 7, 20, 0.75);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 15;
+      transition: all 0.2s ease;
+    }
+
+    .lightbox-nav-btn:hover {
+      background: var(--color-electric-blue);
+      color: #040915;
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    .lightbox-prev {
+      left: 1rem;
+    }
+
+    .lightbox-next {
+      right: 1rem;
+    }
+
+    .lightbox-info {
+      padding: 1.15rem 1.75rem;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .lightbox-text-group {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .lightbox-badge-modal {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--color-electric-blue);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.15rem;
+    }
+
+    .lightbox-title-modal {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+
+    /* ==========================================================================
+       CONTACTO COMPACTO
+       ========================================================================== */
+    .contact-section {
+      text-align: center;
+    }
+
+    .contact-box {
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 2.25rem 1.75rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-highlight);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 0 30px rgba(0, 210, 255, 0.12);
+    }
+
+    /* ==========================================================================
+       FOOTER COMPACTO
+       ========================================================================== */
+    .footer {
+      background: #02050e;
+      border-top: 1px solid rgba(0, 210, 255, 0.1);
+      padding: 1.75rem 0;
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--text-dim);
+    }
+
+    .footer-brand {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 0.15rem;
+    }
+
+    .footer-slogan {
+      color: var(--color-electric-blue);
+      font-size: 0.8rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ==========================================================================
+       BOTÓN FLOTANTE WHATSAPP
+       ========================================================================== */
+    .floating-whatsapp {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+      z-index: 999;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .floating-whatsapp:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 30px rgba(37, 211, 102, 0.6);
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE DESIGN
+       ========================================================================== */
+    @media (max-width: 1150px) {
+      .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 820px) {
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .filter-wrapper {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 78%;
+        max-width: 300px;
+        height: 100vh;
+        background: rgba(4, 7, 20, 0.98);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border-left: 1px solid var(--border-subtle);
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 3rem 2rem;
+        gap: 1.5rem;
+        transition: right var(--transition);
+        z-index: 1000;
+      }
+
+      .nav-menu.is-active {
+        right: 0;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .nav-link {
+        font-size: 1.15rem;
+      }
+
+      .lightbox-info {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .lightbox-info .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .lightbox-nav-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .lightbox-prev {
+        left: 0.5rem;
+      }
+
+      .lightbox-next {
+        right: 0.5rem;
+      }
+
+      .floating-whatsapp {
+        bottom: 16px;
+        right: 16px;
+        width: 48px;
+        height: 48px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="header" id="navbar" role="banner">
+    <div class="container nav-container">
+      <a href="index.html" class="logo-link" aria-label="Diseño J. J. - Inicio">
+        <img src="assets/logo.png" alt="Logotipo oficial de Diseño J. J." class="logo-img" width="38" height="38" />
+        <span class="logo-name">DISEÑO J. J.</span>
+      </a>
+
+      <nav class="nav-menu" id="navMenu" role="navigation" aria-label="Navegación principal">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="index.html#servicios" class="nav-link">Qué hacemos</a>
+        <a href="trabajos.html" class="nav-link">Portafolio</a>
+        <a href="#catalogo" class="nav-link active">Catálogo</a>
+        <a href="index.html#redes" class="nav-link">Redes</a>
+        <a href="#contacto" class="nav-link">Contacto</a>
+      </nav>
+
+      <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menú de navegación" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+  </header>
+
+  <main role="main">
+    <!-- ENCABEZADO DEL CATÁLOGO -->
+    <section class="catalog-header" id="catalogo" aria-label="Encabezado del catálogo">
+      <div class="container">
+        <span class="catalog-badge">Galería Digital</span>
+        <h1 class="catalog-title">CATÁLOGO</h1>
+        <div class="catalog-brand">Diseño J. J.</div>
+        <p class="catalog-subtitle">
+          Equipos, insumos, combos y paquetes comerciales disponibles.
+        </p>
+
+        <!-- FILTROS DE CATEGORÍAS -->
+        <div class="filter-container">
+          <div class="filter-wrapper" role="tablist" aria-label="Filtros del catálogo">
+            <button class="filter-btn active" data-filter="all">TODOS</button>
+            <button class="filter-btn" data-filter="diseno-grafico">DISEÑO GRÁFICO</button>
+            <button class="filter-btn" data-filter="publicidad">PUBLICIDAD EN REDES</button>
+            <button class="filter-btn" data-filter="grabado-laser">GRABADO LÁSER</button>
+            <button class="filter-btn" data-filter="equipos">EQUIPOS E INSUMOS</button>
+            <button class="filter-btn" data-filter="packs-digitales">PAQUETES DIGITALES</button>
+          </div>
+        </div>
+
+        <!-- CUADRÍCULA DE LA GALERÍA (4 COLUMNAS DESKTOP) -->
+        <div class="gallery-grid" id="galleryGrid" aria-live="polite">
+          <!-- Renderizado dinámico -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CONTACTO COMPACTO -->
+    <section class="section contact-section" id="contacto" aria-label="Contacto directo">
+      <div class="container">
+        <div class="contact-box">
+          <span class="catalog-badge" style="margin-bottom: 0.35rem;">Atención Directa</span>
+          <h2
+            style="font-family: var(--font-heading); font-size: clamp(1.6rem, 3.2vw, 2.2rem); font-weight: 800; color: #fff; margin-bottom: 0.35rem;">
+            ¿Tienes un proyecto <span style="color: var(--color-electric-blue);">en mente?</span>
+          </h2>
+          <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 1rem;">
+            Estamos listos para ayudarte.
+          </p>
+          <a href="https://wa.me/message/6LEPZNC677UDD1" target="_blank" rel="noopener noreferrer"
+            class="btn btn-primary" style="padding: 0.85rem 2rem; font-size: 1rem;">
+            <span>ESCRIBIR POR WHATSAPP</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+              </path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- LIGHTBOX / VISOR MODAL CON NAVEGACIÓN -->
+  <div class="lightbox-modal" id="lightboxModal" aria-hidden="true" role="dialog" aria-label="Visor de diseño">
+    <div class="lightbox-container">
+      <button class="lightbox-close-btn" id="lightboxClose" aria-label="Cerrar visor">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="lightbox-media-wrapper">
+        <button class="lightbox-nav-btn lightbox-prev" id="lightboxPrev" aria-label="Trabajo anterior">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <img src="" alt="" class="lightbox-media" id="lightboxImg" />
+
+        <button class="lightbox-nav-btn lightbox-next" id="lightboxNext" aria-label="Trabajo siguiente">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <div class="lightbox-info">
+        <div class="lightbox-text-group">
+          <div class="lightbox-badge-modal" id="lightboxBadge"></div>
+          <h3 class="lightbox-title-modal" id="lightboxTitle"></h3>
+        </div>
+        <a href="https://wa.me/message/6LEPZNC677UDD1" target="_blank" rel="noopener noreferrer"
+          class="btn btn-whatsapp" id="lightboxWhatsappBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+            </path>
+          </svg>
+          <span>Consultar por WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER COMPACTO -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-brand">Diseño J. J.</div>
+      <div class="footer-slogan">Somos tu aliado creativo</div>
+      <p>&copy; 2026 Diseño J. J. — Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- BOTÓN FLOTANTE WHATSAPP -->
+  <a href="https://wa.me/message/6LEPZNC677UDD1" target="_blank" rel="noopener noreferrer" class="floating-whatsapp"
+    aria-label="Contactar por WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path
+        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+      </path>
+    </svg>
+  </a>
+
+  <script>
+    // ==========================================================================
+    // BASE DE DATOS DEL CATÁLOGO (Equipos, Insumos y Servicios Comerciales)
+    // ==========================================================================
+    const catalogo = [
+      {
+        id: 1,
+        titulo: "Diseño Gráfico & Branding",
+        categoria: "diseno-grafico",
+        categoriaLabel: "Diseño Gráfico",
+        descripcion: "Diseño de identidad visual, logotipos y material corporativo para marcas y empresas.",
+        imagen: "assets/catalogo/trabajo-p1-1.webp",
+        destacado: true,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "instagram",
+        urlPublicacion: "https://www.instagram.com/marketing_designjj/"
+      },
+      {
+        id: 2,
+        titulo: "Publicidad en Redes Sociales",
+        categoria: "publicidad",
+        categoriaLabel: "Publicidad en Redes",
+        descripcion: "Flyers comerciales, promociones y contenido estratégico para redes sociales.",
+        imagen: "assets/catalogo/trabajo-p2-1.webp",
+        destacado: true,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "facebook",
+        urlPublicacion: "https://www.facebook.com/mktgraficos/"
+      },
+      {
+        id: 3,
+        titulo: "Grabado Láser Personalizado",
+        categoria: "grabado-laser",
+        categoriaLabel: "Grabado Láser",
+        descripcion: "Grabado de alta precisión en vasos térmicos, termos, mates y artículos metálicos.",
+        imagen: "assets/catalogo/trabajo-p3-1.webp",
+        destacado: true,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "instagram",
+        urlPublicacion: "https://www.instagram.com/marketing_designjj/"
+      },
+      {
+        id: 4,
+        titulo: "Impresora DTF Textil XP-600 (60 cm)",
+        categoria: "equipos",
+        categoriaLabel: "Equipos e Insumos",
+        descripcion: "Sistema de impresión digital directo al film para transferencias textiles de alta durabilidad.",
+        imagen: "assets/catalogo/trabajo-p4-1.webp",
+        destacado: true,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      },
+      {
+        id: 5,
+        titulo: "Combo Básico Sublimación",
+        categoria: "equipos",
+        categoriaLabel: "Equipos e Insumos",
+        descripcion: "Kit de iniciación: prensa de tazas, impresora Epson con tintas y accesorios de producción.",
+        imagen: "assets/catalogo/trabajo-p5-1.webp",
+        destacado: false,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      },
+      {
+        id: 6,
+        titulo: "Grabadora Láser Fibra Óptica (30W / 50W)",
+        categoria: "grabado-laser",
+        categoriaLabel: "Grabado Láser",
+        descripcion: "Equipo profesional de fibra óptica para marcaje de metales y plásticos duros.",
+        imagen: "assets/catalogo/trabajo-p6-1.webp",
+        destacado: false,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      },
+      {
+        id: 7,
+        titulo: "Grabadora Láser Portátil Compacta",
+        categoria: "grabado-laser",
+        categoriaLabel: "Grabado Láser",
+        descripcion: "Máquina de grabado portátil para trabajos rápidos y talleres pequeños.",
+        imagen: "assets/catalogo/trabajo-p6-2.webp",
+        destacado: false,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      },
+      {
+        id: 8,
+        titulo: "Grabadora Láser 30W para Emprendedores",
+        categoria: "grabado-laser",
+        categoriaLabel: "Grabado Láser",
+        descripcion: "Solución accesible y potente para personalización en serie.",
+        imagen: "assets/catalogo/trabajo-p6-3.webp",
+        destacado: false,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      },
+      {
+        id: 9,
+        titulo: "Alicate para Ojales Metálicos",
+        categoria: "equipos",
+        categoriaLabel: "Equipos e Insumos",
+        descripcion: "Herramienta manual reforzada para colocación de ojalillos en lonas y banners.",
+        imagen: "assets/catalogo/trabajo-p7-1.webp",
+        destacado: false,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      },
+      {
+        id: 10,
+        titulo: "Redondeador de Esquinas 3 en 1",
+        categoria: "equipos",
+        categoriaLabel: "Equipos e Insumos",
+        descripcion: "Herramienta de terminación gráfica para esquinas redondeadas en tarjetas y credenciales.",
+        imagen: "assets/catalogo/trabajo-p7-2.webp",
+        destacado: false,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      },
+      {
+        id: 11,
+        titulo: "Perforadora Circular para Stickers",
+        categoria: "equipos",
+        categoriaLabel: "Equipos e Insumos",
+        descripcion: "Troqueladora circular precisa para etiquetas adhesivas y manualidades.",
+        imagen: "assets/catalogo/trabajo-p7-3.webp",
+        destacado: false,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      },
+      {
+        id: 12,
+        titulo: "Packs de Diseños para Grabado 360",
+        categoria: "packs-digitales",
+        categoriaLabel: "Paquetes Digitales",
+        descripcion: "Colecciones vectoriales listas para grabado láser rotativo y corte digital.",
+        imagen: "assets/catalogo/trabajo-p8-1.webp",
+        destacado: false,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      },
+      {
+        id: 13,
+        titulo: "Kits Imprimibles & Toppers de Torta",
+        categoria: "packs-digitales",
+        categoriaLabel: "Paquetes Digitales",
+        descripcion: "Plantillas editables y listas para imprimir de decoración para eventos y fiestas.",
+        imagen: "assets/catalogo/trabajo-p8-2.webp",
+        destacado: false,
+        fecha: "2026-08-23",
+        fuente: "catalogo-pdf",
+        redSocial: "whatsapp",
+        urlPublicacion: "https://wa.me/message/6LEPZNC677UDD1"
+      }
+    ];
+
+    let currentFilter = 'all';
+    let filteredItems = [...catalogo];
+    let currentModalIndex = 0;
+
+    const galleryGrid = document.getElementById('galleryGrid');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    const lightboxModal = document.getElementById('lightboxModal');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxTitle = document.getElementById('lightboxTitle');
+    const lightboxBadge = document.getElementById('lightboxBadge');
+    const lightboxWhatsappBtn = document.getElementById('lightboxWhatsappBtn');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const lightboxPrev = document.getElementById('lightboxPrev');
+    const lightboxNext = document.getElementById('lightboxNext');
+
+    const WHATSAPP_OFFICIAL = 'https://wa.me/message/6LEPZNC677UDD1';
+
+    // RENDERIZADO DE LA GALERÍA
+    function renderGallery(items) {
+      galleryGrid.innerHTML = '';
+      items.forEach((item, index) => {
+        const card = document.createElement('article');
+        card.className = 'gallery-card';
+        card.setAttribute('data-id', item.id);
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Ver diseño: ${item.titulo}`);
+
+        card.innerHTML = `
+          <div class="gallery-img-box">
+            <img src="${item.imagen}" alt="${item.titulo} - ${item.categoriaLabel} por Diseño J. J." class="gallery-img" loading="lazy" />
+            <div class="gallery-overlay">
+              <span class="gallery-badge">${item.categoriaLabel}</span>
+              <h3 class="gallery-title">${item.titulo}</h3>
+              <span class="gallery-zoom-text">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                VER DETALLE
+              </span>
+            </div>
+          </div>
+          <div class="gallery-card-caption">
+            <span class="gallery-caption-title">${item.titulo}</span>
+            <span class="gallery-caption-cat">${item.categoriaLabel}</span>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          openLightbox(index);
+        });
+
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openLightbox(index);
+          }
+        });
+
+        galleryGrid.appendChild(card);
+      });
+    }
+
+    // APLICAR FILTRO
+    function applyFilter(category) {
+      currentFilter = category;
+      filterButtons.forEach(btn => {
+        if (btn.getAttribute('data-filter') === category) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      filteredItems = category === 'all'
+        ? catalogo
+        : catalogo.filter(item => item.categoria === category);
+
+      renderGallery(filteredItems);
+    }
+
+    // EVENTOS DE FILTROS
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.getAttribute('data-filter');
+        applyFilter(cat);
+      });
+    });
+
+    // LEER PARÁMETRO URL PARA FILTRAR AUTOMÁTICAMENTE
+    const urlParams = new URLSearchParams(window.location.search);
+    const catParam = urlParams.get('cat') || urlParams.get('categoria');
+    if (catParam) {
+      applyFilter(catParam);
+    } else {
+      renderGallery(catalogo);
+    }
+
+    // LIGHTBOX / MODAL
+    function updateLightbox(index) {
+      if (index < 0 || index >= filteredItems.length) return;
+      currentModalIndex = index;
+      const item = filteredItems[currentModalIndex];
+      if (!item) return;
+
+      lightboxImg.src = item.imagen;
+      lightboxImg.alt = `${item.titulo} - Diseño J. J.`;
+      lightboxTitle.textContent = item.titulo;
+      lightboxBadge.textContent = item.categoriaLabel;
+
+      const msg = encodeURIComponent(`¡Hola Diseño J. J.! 👋 Me interesa cotizar este producto de su catálogo: *${item.titulo}* (${item.categoriaLabel}).`);
+      lightboxWhatsappBtn.href = `${WHATSAPP_OFFICIAL}?text=${msg}`;
+    }
+
+    function openLightbox(index) {
+      updateLightbox(index);
+      lightboxModal.classList.add('is-open');
+      lightboxModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      lightboxClose?.focus();
+    }
+
+    function closeLightbox() {
+      lightboxModal.classList.remove('is-open');
+      lightboxModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function prevLightbox() {
+      if (filteredItems.length === 0) return;
+      const prevIdx = (currentModalIndex - 1 + filteredItems.length) % filteredItems.length;
+      updateLightbox(prevIdx);
+    }
+
+    function nextLightbox() {
+      if (filteredItems.length === 0) return;
+      const nextIdx = (currentModalIndex + 1) % filteredItems.length;
+      updateLightbox(nextIdx);
+    }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxPrev.addEventListener('click', prevLightbox);
+    lightboxNext.addEventListener('click', nextLightbox);
+
+    lightboxModal.addEventListener('click', (e) => {
+      if (e.target === lightboxModal) closeLightbox();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!lightboxModal.classList.contains('is-open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft') prevLightbox();
+      else if (e.key === 'ArrowRight') nextLightbox();
+    });
+
+    // Menú Móvil
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const navMenu = document.getElementById('navMenu');
+
+    hamburgerBtn.addEventListener('click', () => {
+      const active = navMenu.classList.toggle('is-active');
+      hamburgerBtn.classList.toggle('is-active');
+      hamburgerBtn.setAttribute('aria-expanded', active);
+    });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('is-active');
+        hamburgerBtn.classList.remove('is-active');
+      });
+    });
+  </script>
+</body>
+
+</html>
