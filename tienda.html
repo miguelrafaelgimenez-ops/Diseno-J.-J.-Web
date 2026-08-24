@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Productos Digitales &amp; Cursos | Diseño J. J.</title>
+  <meta name="description"
+    content="Tienda digital oficial de Diseño J. J. — Adquiere packs de plantillas editables, recursos gráficos vectoriales y cursos de publicidad visual." />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       VARIABLES Y SISTEMA DE DISEÑO
+       ========================================================================== */
+    :root {
+      --bg-dark: #040714;
+      --bg-primary: #070d1e;
+      --bg-secondary: #0b142d;
+      --bg-card: rgba(11, 20, 45, 0.82);
+
+      --color-electric-blue: #00d2ff;
+      --color-primary-blue: #0066ff;
+      --color-gold: #e5b869;
+      --color-green: #25d366;
+
+      --text-white: #ffffff;
+      --text-light: #f1f5f9;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+
+      --border-subtle: rgba(0, 210, 255, 0.16);
+      --border-highlight: rgba(0, 210, 255, 0.45);
+
+      --glow-blue: 0 0 22px rgba(0, 210, 255, 0.32);
+      --shadow-card: 0 8px 24px -6px rgba(0, 0, 0, 0.6);
+
+      --font-heading: 'Outfit', system-ui, sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: var(--font-body);
+      line-height: 1.55;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 100vh;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 90% 35%, rgba(0, 210, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 10% 75%, rgba(0, 102, 255, 0.06) 0%, transparent 45%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    img,
+    svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 clamp(1.25rem, 3.5vw, 2.5rem);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ==========================================================================
+       BOTONES Y ESTILOS DE TIENDA
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.4rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-align: center;
+      white-space: nowrap;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--color-electric-blue) 0%, var(--color-primary-blue) 100%);
+      color: #040915;
+      box-shadow: var(--glow-blue);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 210, 255, 0.5);
+      color: #020610;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-white);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 210, 255, 0.12);
+      border-color: var(--color-electric-blue);
+      color: var(--color-electric-blue);
+    }
+
+    .btn-buy-now {
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-buy-now:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(37, 211, 102, 0.5);
+    }
+
+    /* ==========================================================================
+       NAVBAR CON CARRITO
+       ========================================================================== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0.85rem 0;
+      background: rgba(4, 7, 20, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .logo-img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(0, 210, 255, 0.4));
+    }
+
+    .logo-name {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+    }
+
+    .nav-link {
+      font-size: 0.925rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      position: relative;
+      padding: 0.25rem 0;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--text-white);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--color-electric-blue);
+    }
+
+    .cart-btn-trigger {
+      position: relative;
+      background: rgba(0, 210, 255, 0.1);
+      border: 1px solid var(--border-subtle);
+      color: var(--color-electric-blue);
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all var(--transition);
+    }
+
+    .cart-btn-trigger:hover {
+      background: rgba(0, 210, 255, 0.2);
+      border-color: var(--color-electric-blue);
+      color: #fff;
+    }
+
+    .cart-badge-count {
+      background: #ff4d4d;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.15rem 0.45rem;
+      border-radius: 99px;
+      display: none;
+    }
+
+    /* ==========================================================================
+       HERO DE TIENDA DIGITAL
+       ========================================================================== */
+    .store-hero {
+      padding-top: calc(65px + 2.5rem);
+      padding-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .store-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.9rem;
+      border-radius: var(--radius-full);
+      background: rgba(0, 210, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      color: var(--color-electric-blue);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .store-title {
+      font-family: var(--font-heading);
+      font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+      font-weight: 900;
+      color: var(--text-white);
+      line-height: 1.08;
+      margin-bottom: 0.4rem;
+    }
+
+    .store-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       FILTROS Y GRID DE PRODUCTOS
+       ========================================================================== */
+    .filter-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.55rem 1.25rem;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .filter-btn:hover {
+      background: rgba(0, 210, 255, 0.12);
+      color: #fff;
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, var(--color-electric-blue) 0%, var(--color-primary-blue) 100%);
+      color: #040915;
+      font-weight: 700;
+      border-color: transparent;
+      box-shadow: 0 0 18px rgba(0, 210, 255, 0.35);
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.6rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--border-highlight);
+      box-shadow: 0 12px 30px rgba(0, 210, 255, 0.22);
+    }
+
+    .product-img-box {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: #020510;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.45s ease;
+    }
+
+    .product-card:hover .product-img {
+      transform: scale(1.05);
+    }
+
+    .product-type-badge {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-full);
+      background: rgba(4, 7, 20, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-highlight);
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--color-electric-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .product-type-badge.course {
+      border-color: rgba(229, 184, 105, 0.6);
+      color: var(--color-gold);
+    }
+
+    .product-body {
+      padding: 1.35rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .product-title {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-white);
+      margin-bottom: 0.35rem;
+      line-height: 1.25;
+    }
+
+    .product-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1.15rem;
+      flex-grow: 1;
+    }
+
+    .product-price-tag {
+      font-family: var(--font-heading);
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--color-electric-blue);
+      margin-bottom: 1.15rem;
+    }
+
+    .product-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .product-actions .btn {
+      padding: 0.65rem 0.8rem;
+      font-size: 0.825rem;
+      width: 100%;
+    }
+
+    /* ==========================================================================
+       DRAWER LATERAL DEL CARRITO
+       ========================================================================== */
+    .cart-drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 16, 0.82);
+      backdrop-filter: blur(12px);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+    }
+
+    .cart-drawer-overlay.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-highlight);
+      z-index: 2001;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: -10px 0 35px rgba(0, 0, 0, 0.8);
+    }
+
+    .cart-drawer-overlay.is-open .cart-drawer {
+      right: 0;
+    }
+
+    .cart-drawer-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-primary);
+    }
+
+    .cart-drawer-title {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+
+    .cart-drawer-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.2rem;
+    }
+
+    .cart-drawer-close:hover {
+      color: #fff;
+    }
+
+    .cart-drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .cart-drawer-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-primary);
+    }
+
+    .cart-drawer-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.15rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .cart-drawer-total-val {
+      color: var(--color-electric-blue);
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+    }
+
+    .cart-drawer-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE
+       ========================================================================== */
+    @media (max-width: 980px) {
+      .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .product-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-menu {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="header" role="banner">
+    <div class="container nav-container">
+      <a href="index.html" class="logo-link">
+        <img src="assets/logo.png" alt="Logotipo oficial de Diseño J. J." class="logo-img" />
+        <span class="logo-name">DISEÑO J. J.</span>
+      </a>
+
+      <div class="nav-right" style="align-self: unset;">
+        <a href="#inicio" class="nav-link active">Inicio</a>
+        <a href="#servicios" class="nav-link">Qué hacemos</a>
+        <a href="#trabajos" class="nav-link">Trabajos</a>
+        <a href="tienda.html" class="nav-link">Tienda Digital</a>
+        <a href="#lo-ultimo" class="nav-link">Lo último</a>
+        <a href="#redes" class="nav-link">Redes</a>
+        <a href="#contacto" class="nav-link">Contacto</a>
+        </nav>
+
+        <button class="cart-btn-trigger" id="cartToggleBtn" aria-label="Abrir Carrito de Compras">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span>CARRITO</span>
+          <span class="cart-badge-count">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main role="main">
+    <!-- HERO DE TIENDA DIGITAL -->
+    <section class="store-hero">
+      <div class="container">
+        <span class="store-badge">Venta Digital Directa</span>
+        <h1 class="store-title">PRODUCTOS DIGITALES &amp; CURSOS</h1>
+        <p class="store-subtitle">
+          Adquiere packs de plantillas editables, recursos gráficos vectoriales y cursos prácticos de publicidad visual
+          en Guaraníes (₲).
+        </p>
+
+        <!-- FILTROS DE CATEGORÍAS -->
+        <div class="filter-wrapper">
+          <button class="filter-btn active" data-filter="all">TODOS</button>
+          <button class="filter-btn" data-filter="DOWNLOAD">PACKS &amp; PLANTILLAS</button>
+          <button class="filter-btn" data-filter="COURSE">CURSOS ONLINE</button>
+        </div>
+
+        <!-- GRID DE PRODUCTOS DIGITALES -->
+        <div class="products-grid" id="productsGrid">
+          <!-- Renderizado dinámico por JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- DRAWER LATERAL DEL CARRITO DE COMPRAS -->
+  <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+    <div class="cart-drawer" role="dialog" aria-label="Carrito de compras">
+      <div class="cart-drawer-header">
+        <h2 class="cart-drawer-title">Tu Carrito de Compras</h2>
+        <button class="cart-drawer-close" id="cartDrawerClose" aria-label="Cerrar carrito">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="cart-drawer-body" id="cartDrawerBody">
+        <!-- Contenido dinámico del carrito -->
+      </div>
+
+      <div class="cart-drawer-footer">
+        <div class="cart-drawer-total-row">
+          <span>TOTAL:</span>
+          <span class="cart-drawer-total-val" id="cartDrawerTotal">₲ 0</span>
+        </div>
+        <div class="cart-drawer-actions">
+          <a href="checkout.html" class="btn btn-primary" style="width: 100%;">
+            <span>FINALIZAR COMPRA</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </a>
+          <button class="btn btn-secondary"
+            onclick="document.getElementById('cartDrawerOverlay').classList.remove('is-open')" style="width: 100%;">
+            <span>CONTINUAR COMPRANDO</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INCLUSIÓN DEL MÓDULO DE CARRITO JS -->
+  <script src="assets/js/cart.js"></script>
+
+  <script>
+    // Datos de productos por defecto (en caso de consulta estática o servidor local API)
+    const fallbackProducts = [
+      {
+        id: 1,
+        name: "Pack Mega Redes Sociales 2026",
+        short_desc: "150+ plantillas editables para Instagram, Facebook y TikTok.",
+        description: "Más de 150 plantillas editables y recursos vectoriales para publicidad en Instagram, Facebook y TikTok.",
+        price_guarani: 50000,
+        image_url: "assets/trabajos/trabajo-canva-11.webp",
+        type: "DOWNLOAD"
+      },
+      {
+        id: 2,
+        name: "Kit de Marcas & Logotipos Vectoriales",
+        short_desc: "Colección de vectores y elementos de branding corporativo.",
+        description: "Colección exclusiva de isotipos, tipografías corporativas, manuales de marca e insumos visuales.",
+        price_guarani: 75000,
+        image_url: "assets/trabajos/trabajo-canva-19.webp",
+        type: "DOWNLOAD"
+      },
+      {
+        id: 3,
+        name: "Curso Online: Publicidad Visual de Alto Impacto",
+        short_desc: "Aprende a diseñar campañas y publicidad que vende.",
+        description: "Aprende paso a paso a diseñar campañas publicitarias efectivas para redes sociales y composición visual.",
+        price_guarani: 120000,
+        image_url: "assets/trabajos/trabajo-canva-8.webp",
+        type: "COURSE"
+      },
+      {
+        id: 4,
+        name: "Pack Gastronomía & Menús Restaurante",
+        short_desc: "Diseños de menús, promociones y flyers gastronómicos.",
+        description: "Plantillas de cartas, menús, promociones para comida rápida, bares y restaurantes.",
+        price_guarani: 60000,
+        image_url: "assets/trabajos/trabajo-canva-30.webp",
+        type: "DOWNLOAD"
+      },
+      {
+        id: 5,
+        name: "Vectores Grabado Láser & Rotativo 360°",
+        short_desc: "Diseños listos para grabado láser en termos y vasos.",
+        description: "Diseños vectoriales listos para grabado en fibra óptica o CO2 sobre termos y vasos térmicos.",
+        price_guarani: 85000,
+        image_url: "assets/catalogo/trabajo-p8-1.webp",
+        type: "DOWNLOAD"
+      }
+    ];
+
+    let allDigitalProducts = [...fallbackProducts];
+
+    const productsGrid = document.getElementById('productsGrid');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    // Cargar productos desde API o fallback
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.products && data.products.length > 0) {
+            allDigitalProducts = data.products;
+          }
+        }
+      } catch (e) {
+        console.log('Usando datos de tienda local.');
+      }
+      renderProducts('all');
+    }
+
+    // Renderizar tarjetas de productos
+    function renderProducts(filter = 'all') {
+      productsGrid.innerHTML = '';
+      const items = filter === 'all'
+        ? allDigitalProducts
+        : allDigitalProducts.filter(p => p.type === filter);
+
+      items.forEach(p => {
+        const isCourse = p.type === 'COURSE';
+        const card = document.createElement('article');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-img-box">
+            <img src="${p.image_url}" alt="${p.name}" class="product-img" loading="lazy" />
+            <span class="product-type-badge ${isCourse ? 'course' : ''}">${isCourse ? 'CURSO ONLINE' : 'DESCARGABLE'}</span>
+          </div>
+          <div class="product-body">
+            <h3 class="product-title">${p.name}</h3>
+            <p class="product-desc">${p.short_desc || p.description}</p>
+            <div class="product-price-tag">${formatGuarani(p.price_guarani)}</div>
+            <div class="product-actions">
+              <button class="btn btn-secondary" onclick='handleAddToCart(${JSON.stringify(p)})'>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                <span>AGREGAR</span>
+              </button>
+              <button class="btn btn-buy-now" onclick='handleBuyNow(${JSON.stringify(p)})'>
+                <span>COMPRAR</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+          </div>
+        `;
+        productsGrid.appendChild(card);
+      });
+    }
+
+    function handleAddToCart(product) {
+      addToCart(product, 1, true);
+    }
+
+    function handleBuyNow(product) {
+      addToCart(product, 1, false);
+      window.location.href = 'checkout.html';
+    }
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderProducts(btn.getAttribute('data-filter'));
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
+</body>
+
+</html>

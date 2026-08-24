@@ -1,0 +1,21 @@
+# Archivos de Entorno y Claves Privadas
+.env
+.env.local
+.env.production
+
+# Dependencias Node.js
+node_modules/
+npm-debug.log*
+
+# Almacenamiento Privado de Comprobantes y Productos Digitales
+storage/digital_files/*
+!storage/digital_files/.gitkeep
+storage/payment_proofs/*
+!storage/payment_proofs/.gitkeep
+server/database/diseno_jj.db
+
+# Sistema Operativo y Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

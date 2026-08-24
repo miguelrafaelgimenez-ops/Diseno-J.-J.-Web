@@ -879,21 +879,35 @@
         <span class="logo-name">DISEÑO J. J.</span>
       </a>
 
-      <nav class="nav-menu" id="navMenu" role="navigation" aria-label="Navegación principal">
-        <a href="index.html" class="nav-link">Inicio</a>
-        <a href="index.html#servicios" class="nav-link">Qué hacemos</a>
-        <a href="#portafolio" class="nav-link active">Portafolio</a>
-        <a href="catalogo.html" class="nav-link">Catálogo</a>
-        <a href="index.html#redes" class="nav-link">Redes</a>
+      <div class="nav-right" style="align-self: unset;">
+        <a href="#inicio" class="nav-link active">Inicio</a>
+        <a href="#servicios" class="nav-link">Qué hacemos</a>
+        <a href="#trabajos" class="nav-link">Trabajos</a>
+        <a href="tienda.html" class="nav-link">Tienda Digital</a>
+        <a href="#lo-ultimo" class="nav-link">Lo último</a>
+        <a href="#redes" class="nav-link">Redes</a>
         <a href="#contacto" class="nav-link">Contacto</a>
-      </nav>
+        </nav>
 
-      <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menú de navegación" aria-expanded="false">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
-    </div>
+        <button class="cart-btn-trigger" id="cartToggleBtn" aria-label="Abrir Carrito de Compras"
+          style="background: rgba(0, 210, 255, 0.1); border: 1px solid rgba(0, 210, 255, 0.25); color: #00d2ff; padding: 0.45rem 0.95rem; border-radius: 99px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: all 0.25s ease;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span>CARRITO</span>
+          <span class="cart-badge-count"
+            style="background: #ff4d4d; color: #fff; font-size: 0.72rem; padding: 0.1rem 0.4rem; border-radius: 99px; display: none;">0</span>
+        </button>
+
+        <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menú de navegación" aria-expanded="false">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
   </header>
 
   <main role="main">
@@ -1375,7 +1389,30 @@
       else if (e.key === 'ArrowLeft') prevLightbox();
       else if (e.key === 'ArrowRight') nextLightbox();
     });
+  </script>
 
+  <!-- DRAWER LATERAL DEL CARRITO -->
+  <div class="cart-drawer-overlay" id="cartDrawerOverlay" style="position: fixed; inset: 0; background: rgba(3, 6, 16, 0.82); backdrop-filter: blur(12px); z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.25s, visibility 0.25s;">
+    <div style="position: fixed; top: 0; right: 0; width: 100%; max-width: 420px; height: 100vh; background: #0b142d; border-left: 1px solid rgba(0, 210, 255, 0.45); z-index: 2001; display: flex; flex-direction: column; box-shadow: -10px 0 35px rgba(0, 0, 0, 0.8);">
+      <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(0, 210, 255, 0.16); display: flex; align-items: center; justify-content: space-between; background: #070d1e;">
+        <h2 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0;">Tu Carrito de Compras</h2>
+        <button id="cartDrawerClose" style="background: transparent; border: none; color: #cbd5e1; cursor: pointer;">✕</button>
+      </div>
+      <div id="cartDrawerBody" style="flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem;"></div>
+      <div style="padding: 1.25rem 1.5rem; border-top: 1px solid rgba(0, 210, 255, 0.16); background: #070d1e;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.15rem; font-weight: 800;">
+          <span>TOTAL:</span>
+          <span id="cartDrawerTotal" style="color: #00d2ff; font-family: var(--font-heading); font-size: 1.35rem;">₲ 0</span>
+        </div>
+        <a href="checkout.html" class="btn btn-primary" style="width: 100%; display: inline-flex; justify-content: center; text-decoration: none;">FINALIZAR COMPRA</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÓDULO DE CARRITO DE COMPRAS -->
+  <script src="assets/js/cart.js"></script>
+
+  <script>
     // Menú Móvil
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const navMenu = document.getElementById('navMenu');

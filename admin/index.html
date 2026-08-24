@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diseño J. J. — Administración de Ventas</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-dark: #040714;
+      --bg-secondary: #0b142d;
+      --bg-card: rgba(11, 20, 45, 0.9);
+      --color-electric-blue: #00d2ff;
+      --color-primary-blue: #0066ff;
+      --color-gold: #e5b869;
+      --color-green: #25d366;
+      --color-red: #ff4d4d;
+      --text-muted: #cbd5e1;
+      --border-subtle: rgba(0, 210, 255, 0.18);
+      --font-heading: 'Outfit', system-ui, sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--bg-dark); color: #fff; line-height: 1.5; padding-bottom: 3rem; }
+    
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    
+    /* LOGIN OVERLAY */
+    .login-overlay {
+      position: fixed; inset: 0; background: var(--bg-dark); z-index: 3000;
+      display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .login-box {
+      max-width: 400px; width: 100%; background: var(--bg-secondary); border: 1px solid var(--border-subtle);
+      border-radius: 16px; padding: 2.25rem 1.75rem; box-shadow: 0 15px 40px rgba(0,0,0,0.8); text-align: center;
+    }
+    
+    .form-input {
+      width: 100%; padding: 0.75rem 1rem; border-radius: 8px; background: rgba(4,7,20,0.8);
+      border: 1px solid var(--border-subtle); color: #fff; font-family: inherit; margin-bottom: 1rem;
+    }
+    
+    .btn {
+      padding: 0.7rem 1.4rem; border-radius: 30px; font-weight: 700; cursor: pointer; border: none; font-size: 0.9rem;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--color-electric-blue) 0%, var(--color-primary-blue) 100%); color: #040915; }
+    .btn-success { background: var(--color-green); color: #fff; }
+    .btn-danger { background: var(--color-red); color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--border-subtle); }
+    
+    /* HEADER ADMIN */
+    .admin-header {
+      padding: 1rem 0; border-bottom: 1px solid var(--border-subtle); background: #040817; margin-bottom: 2rem;
+    }
+    .admin-nav { display: flex; align-items: center; justify-content: space-between; }
+    .admin-nav-links { display: flex; gap: 1.25rem; align-items: center; }
+    .admin-nav-link { color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-decoration: none; }
+    .admin-nav-link.active { color: var(--color-electric-blue); font-weight: 800; }
+    
+    /* STATS CARDS */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.25rem; }
+    .stat-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.35rem; }
+    .stat-val { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 900; color: #fff; }
+
+    /* TABLE */
+    .table-container { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; overflow: hidden; }
+    .table-tabs { display: flex; gap: 0.5rem; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .table-tab-btn { padding: 0.45rem 1rem; border-radius: 20px; background: transparent; border: 1px solid transparent; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 700; }
+    .table-tab-btn.active { background: rgba(0, 210, 255, 0.12); border-color: var(--color-electric-blue); color: var(--color-electric-blue); }
+    
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    th { padding: 1rem; background: rgba(0,0,0,0.3); color: var(--text-muted); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
+    td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+    .status-pill { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 800; }
+    .status-pill.PENDING { background: rgba(229, 184, 105, 0.18); color: var(--color-gold); }
+    .status-pill.PAID, .status-pill.DELIVERED { background: rgba(37, 211, 102, 0.18); color: var(--color-green); }
+    .status-pill.REJECTED { background: rgba(255, 77, 77, 0.18); color: var(--color-red); }
+
+    /* MODAL DETALLE DE PEDIDO */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(3,6,16,0.9); backdrop-filter: blur(10px);
+      z-index: 2500; display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+      opacity: 0; visibility: hidden; transition: all 0.25s ease;
+    }
+    .modal-overlay.is-open { opacity: 1; visibility: visible; }
+    .modal-card { max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; background: var(--bg-secondary); border: 1px solid var(--color-electric-blue); border-radius: 16px; padding: 2rem; }
+
+    @media (max-width: 820px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN OVERLAY -->
+  <div class="login-overlay" id="adminLoginOverlay">
+    <form class="login-box" id="adminLoginForm">
+      <img src="../assets/logo.png" alt="Diseño J. J." style="width: 50px; margin: 0 auto 0.75rem auto;" />
+      <h2 style="font-family: var(--font-heading); margin-bottom: 0.25rem;">Administración</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Diseño J. J. — Ventas Digitales</p>
+      
+      <input type="text" id="loginUsername" class="form-input" placeholder="Usuario" value="admin" required />
+      <input type="password" id="loginPassword" class="form-input" placeholder="Contraseña" value="admin123" required />
+      
+      <button type="submit" class="btn btn-primary" style="width: 100%;">INICIAR SESIÓN</button>
+    </form>
+  </div>
+
+  <!-- HEADER ADMIN -->
+  <header class="admin-header">
+    <div class="container admin-nav">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <img src="../assets/logo.png" alt="Diseño J. J." style="width: 32px;" />
+        <span style="font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem;">Diseño J. J. | Admin</span>
+      </div>
+
+      <div class="admin-nav-links">
+        <a href="index.html" class="admin-nav-link active">Pedidos &amp; Ventas</a>
+        <a href="productos.html" class="admin-nav-link">Productos Digitales</a>
+        <button onclick="logoutAdmin()" class="btn btn-secondary" style="padding: 0.4rem 0.9rem; font-size: 0.8rem;">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- DASHBOARD STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Ingresos Totales</div>
+        <div class="stat-val" style="color: var(--color-electric-blue);" id="statIncome">₲ 0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Pendientes de Pago</div>
+        <div class="stat-val" style="color: var(--color-gold);" id="statPending">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Pagados / Aprobados</div>
+        <div class="stat-val" style="color: var(--color-green);" id="statPaid">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Rechazados</div>
+        <div class="stat-val" style="color: var(--color-red);" id="statRejected">0</div>
+      </div>
+    </div>
+
+    <!-- TABLA DE PEDIDOS -->
+    <div class="table-container">
+      <div class="table-tabs">
+        <button class="table-tab-btn active" onclick="filterOrders('ALL', this)">TODOS</button>
+        <button class="table-tab-btn" onclick="filterOrders('PENDING', this)">PENDIENTES</button>
+        <button class="table-tab-btn" onclick="filterOrders('PAID', this)">APROBADOS</button>
+        <button class="table-tab-btn" onclick="filterOrders('REJECTED', this)">RECHAZADOS</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Código Pedido</th>
+            <th>Cliente</th>
+            <th>Teléfono / Email</th>
+            <th>Pago</th>
+            <th>Total (₲)</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <!-- Carga dinámica -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- MODAL REVISIÓN DE PEDIDO -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2 style="font-family: var(--font-heading); font-size: 1.35rem;" id="modalOrderCode">DJJ-2026-XXXXX</h2>
+        <button onclick="closeModal()" style="background: transparent; border: none; color: #fff; cursor: pointer;">✕</button>
+      </div>
+
+      <div id="modalOrderContent">
+        <!-- Contenido dinámico -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let authToken = localStorage.getItem('diseno_jj_admin_token') || '';
+    let currentFilterStatus = null;
+    let allOrdersData = [];
+
+    function formatGuarani(amount) {
+      return '₲ ' + Number(amount).toLocaleString('es-PY');
+    }
+
+    // Login Form Submit
+    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const u = document.getElementById('loginUsername').value;
+      const p = document.getElementById('loginPassword').value;
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        const data = await res.json();
+        if (res.ok && data.token) {
+          authToken = data.token;
+          localStorage.setItem('diseno_jj_admin_token', authToken);
+          document.getElementById('adminLoginOverlay').style.display = 'none';
+          loadAdminDashboard();
+        } else {
+          alert(data.error || 'Credenciales incorrectas.');
+        }
+      } catch (err) {
+        alert('Error al conectar con el servidor.');
+      }
+    });
+
+    function logoutAdmin() {
+      localStorage.removeItem('diseno_jj_admin_token');
+      location.reload();
+    }
+
+    async function loadAdminDashboard() {
+      if (!authToken) return;
+      document.getElementById('adminLoginOverlay').style.display = 'none';
+
+      try {
+        const res = await fetch('/api/admin/orders', {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (res.status === 401) {
+          document.getElementById('adminLoginOverlay').style.display = 'flex';
+          return;
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          allOrdersData = data.orders;
+          
+          // Actualizar Estadísticas
+          document.getElementById('statIncome').textContent = formatGuarani(data.stats.total_income_guarani);
+          document.getElementById('statPending').textContent = data.stats.pending;
+          document.getElementById('statPaid').textContent = data.stats.paid;
+          document.getElementById('statRejected').textContent = data.stats.rejected;
+
+          renderTable(allOrdersData);
+        }
+      } catch (err) {
+        console.error('Error al cargar pedidos.');
+      }
+    }
+
+    function renderTable(orders) {
+      const tbody = document.getElementById('ordersTableBody');
+      if (orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No hay pedidos en esta categoría.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td><b style="color: var(--color-electric-blue);">${o.order_code}</b></td>
+          <td>${o.customer_name}</td>
+          <td>${o.customer_phone}<br/><span style="font-size: 0.8rem; color: var(--text-muted);">${o.customer_email}</span></td>
+          <td>${o.payment_method === 'TRANSFER' ? 'Transferencia' : 'Giro'}</td>
+          <td><b>${formatGuarani(o.total_guarani)}</b></td>
+          <td><span class="status-pill ${o.status}">${o.status === 'PENDING' ? 'PENDIENTE' : (o.status === 'PAID' ? 'APROBADO' : 'RECHAZADO')}</span></td>
+          <td><button class="btn btn-secondary" onclick="openOrderModal(${o.id})" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;">REVISAR</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function filterOrders(status, btn) {
+      document.querySelectorAll('.table-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (status === 'ALL') {
+        renderTable(allOrdersData);
+      } else if (status === 'PAID') {
+        renderTable(allOrdersData.filter(o => o.status === 'PAID' || o.status === 'DELIVERED'));
+      } else {
+        renderTable(allOrdersData.filter(o => o.status === status));
+      }
+    }
+
+    async function openOrderModal(orderId) {
+      const order = allOrdersData.find(o => o.id === orderId);
+      if (!order) return;
+
+      document.getElementById('modalOrderCode').textContent = `Pedido: ${order.order_code}`;
+      const content = document.getElementById('modalOrderContent');
+
+      const itemsList = order.items.map(i => `<li><b>${i.product_name}</b> x${i.quantity} — ${formatGuarani(i.price_guarani)}</li>`).join('');
+
+      content.innerHTML = `
+        <div style="margin-bottom: 1rem; font-size: 0.95rem;">
+          <p><b>Cliente:</b> ${order.customer_name}</p>
+          <p><b>Email:</b> ${order.customer_email}</p>
+          <p><b>Teléfono:</b> ${order.customer_phone}</p>
+          <p><b>Método de Pago:</b> ${order.payment_method === 'TRANSFER' ? 'Transferencia Bancaria' : 'Giro Móvil'}</p>
+          <p><b>Fecha:</b> ${new Date(order.created_at).toLocaleString()}</p>
+        </div>
+
+        <div style="background: #040817; padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem;">
+          <h4 style="color: var(--color-electric-blue); margin-bottom: 0.5rem;">Productos del Pedido:</h4>
+          <ul>${itemsList}</ul>
+          <h3 style="margin-top: 0.75rem; color: #fff;">Total: ${formatGuarani(order.total_guarani)}</h3>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="margin-bottom: 0.5rem;">Comprobante de Pago Subido:</h4>
+          ${order.proof_file_name ? `
+            <a href="/api/admin/proofs/${order.proof_file_name}?token=${authToken}" target="_blank" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <span>VER COMPROBANTE DE PAGO</span>
+            </a>
+          ` : '<p style="color: var(--color-red);">Sin comprobante adjunto</p>'}
+        </div>
+
+        ${order.status === 'PENDING' ? `
+          <div style="display: flex; gap: 0.75rem; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+            <button class="btn btn-danger" onclick="rejectOrder(${order.id})">RECHAZAR PAGO</button>
+            <button class="btn btn-success" onclick="approveOrder(${order.id})">APROBAR PAGO Y ENTREGAR</button>
+          </div>
+        ` : `
+          <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 8px; font-weight: 700; text-align: center;">
+            Estado Actual: <span class="status-pill ${order.status}">${order.status}</span>
+          </div>
+        `}
+      `;
+
+      document.getElementById('orderModal').classList.add('is-open');
+    }
+
+    function closeModal() {
+      document.getElementById('orderModal').classList.remove('is-open');
+    }
+
+    async function approveOrder(orderId) {
+      if (!confirm('¿Confirmar que el pago fue recibido en la cuenta de Diseño J. J.?')) return;
+
+      try {
+        const res = await fetch(`/api/admin/orders/${orderId}/approve`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert('¡Pago APROBADO correctamente! El correo de entrega fue enviado al cliente.');
+          closeModal();
+          loadAdminDashboard();
+        } else {
+          alert(data.error || 'Error al aprobar pedido.');
+        }
+      } catch (err) {
+        alert('Error de comunicación con el servidor.');
+      }
+    }
+
+    async function rejectOrder(orderId) {
+      const reason = prompt('Indique el motivo del rechazo del comprobante:');
+      if (reason === null) return;
+
+      try {
+        const res = await fetch(`/api/admin/orders/${orderId}/reject`, {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ reason })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert('Pedido RECHAZADO.');
+          closeModal();
+          loadAdminDashboard();
+        } else {
+          alert(data.error || 'Error al rechazar pedido.');
+        }
+      } catch (err) {
+        alert('Error de comunicación con el servidor.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (authToken) loadAdminDashboard();
+    });
+  </script>
+</body>
+</html>

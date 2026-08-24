@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Productos Digitales | Diseño J. J.</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-dark: #040714;
+      --bg-secondary: #0b142d;
+      --bg-card: rgba(11, 20, 45, 0.9);
+      --color-electric-blue: #00d2ff;
+      --color-primary-blue: #0066ff;
+      --text-muted: #cbd5e1;
+      --border-subtle: rgba(0, 210, 255, 0.18);
+      --font-heading: 'Outfit', system-ui, sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--bg-dark); color: #fff; line-height: 1.5; padding-bottom: 3rem; }
+    .container { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+    .admin-header { padding: 1rem 0; border-bottom: 1px solid var(--border-subtle); background: #040817; margin-bottom: 2rem; }
+    .admin-nav { display: flex; align-items: center; justify-content: space-between; }
+    .admin-nav-links { display: flex; gap: 1.25rem; align-items: center; }
+    .admin-nav-link { color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-decoration: none; }
+    .admin-nav-link.active { color: var(--color-electric-blue); font-weight: 800; }
+
+    .btn { padding: 0.65rem 1.3rem; border-radius: 30px; font-weight: 700; cursor: pointer; border: none; font-size: 0.85rem; }
+    .btn-primary { background: linear-gradient(135deg, var(--color-electric-blue) 0%, var(--color-primary-blue) 100%); color: #040915; }
+
+    .card-box { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 0.75rem 1rem; border-radius: 8px; background: rgba(4,7,20,0.8);
+      border: 1px solid var(--border-subtle); color: #fff; font-family: inherit; font-size: 0.9rem;
+    }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    th { padding: 0.85rem 1rem; background: rgba(0,0,0,0.3); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+    td { padding: 0.85rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <header class="admin-header">
+    <div class="container admin-nav">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <img src="../assets/logo.png" alt="Diseño J. J." style="width: 32px;" />
+        <span style="font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem;">Diseño J. J. | Productos</span>
+      </div>
+
+      <div class="admin-nav-links">
+        <a href="index.html" class="admin-nav-link">Pedidos &amp; Ventas</a>
+        <a href="productos.html" class="admin-nav-link active">Productos Digitales</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid-2">
+      <!-- FORMULARIO CREADOR DE PRODUCTOS -->
+      <div class="card-box">
+        <h2 style="font-family: var(--font-heading); font-size: 1.25rem; margin-bottom: 1.25rem;" id="formTitle">Crear Producto Digital / Curso</h2>
+
+        <form id="productForm">
+          <input type="hidden" id="prodId" />
+          
+          <div class="form-group">
+            <label class="form-label" for="prodName">Nombre del Producto *</label>
+            <input type="text" id="prodName" class="form-input" placeholder="Ej. Pack Mega Redes 2026" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prodShortDesc">Descripción Corta</label>
+            <input type="text" id="prodShortDesc" class="form-input" placeholder="150+ plantillas editables para Instagram y FB" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prodPrice">Precio en Guaraníes (₲) *</label>
+            <input type="number" id="prodPrice" class="form-input" placeholder="50000" required />
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label" for="prodType">Tipo de Producto</label>
+              <select id="prodType" class="form-select">
+                <option value="DOWNLOAD">Descargable (ZIP/PDF)</option>
+                <option value="COURSE">Curso Online</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prodStatus">Estado</label>
+              <select id="prodStatus" class="form-select">
+                <option value="ACTIVE">Activo</option>
+                <option value="INACTIVE">Inactivo / Oculto</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prodImageUrl">URL o Ruta de Imagen</label>
+            <input type="text" id="prodImageUrl" class="form-input" value="assets/trabajos/trabajo-canva-11.webp" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prodFileName">Nombre de Archivo Digital (en storage/digital_files/)</label>
+            <input type="text" id="prodFileName" class="form-input" placeholder="pack-mega-redes-2026.zip" />
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">GUARDAR PRODUCTO</button>
+            <button type="button" class="btn" style="background: rgba(255,255,255,0.1); color: #fff;" onclick="resetForm()">LIMPIAR</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- LISTADO DE PRODUCTOS DIGITALES -->
+      <div class="card-box">
+        <h2 style="font-family: var(--font-heading); font-size: 1.25rem; margin-bottom: 1.25rem;">Productos en Catálogo Digital</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Tipo</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody">
+            <!-- Carga dinámica -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const authToken = localStorage.getItem('diseno_jj_admin_token') || '';
+
+    function formatGuarani(amount) {
+      return '₲ ' + Number(amount).toLocaleString('es-PY');
+    }
+
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          const data = await res.json();
+          renderProductsTable(data.products || []);
+        }
+      } catch (err) {
+        console.error('Error al cargar productos');
+      }
+    }
+
+    function renderProductsTable(products) {
+      const tbody = document.getElementById('productsTableBody');
+      tbody.innerHTML = products.map(p => `
+        <tr>
+          <td><img src="../${p.image_url}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" /></td>
+          <td><b>${p.name}</b></td>
+          <td><b style="color: var(--color-electric-blue);">${formatGuarani(p.price_guarani)}</b></td>
+          <td><span style="font-size: 0.75rem; font-weight: 800; color: ${p.type === 'COURSE' ? 'var(--color-gold)' : 'var(--color-electric-blue)'};">${p.type}</span></td>
+          <td><button class="btn" style="background: rgba(0,210,255,0.15); color: var(--color-electric-blue); padding: 0.25rem 0.65rem; font-size: 0.75rem;" onclick='editProduct(${JSON.stringify(p)})'>EDITAR</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function editProduct(p) {
+      document.getElementById('formTitle').textContent = 'Editar Producto Digital';
+      document.getElementById('prodId').value = p.id;
+      document.getElementById('prodName').value = p.name;
+      document.getElementById('prodShortDesc').value = p.short_desc || p.description;
+      document.getElementById('prodPrice').value = p.price_guarani;
+      document.getElementById('prodType').value = p.type;
+      document.getElementById('prodStatus').value = p.status;
+      document.getElementById('prodImageUrl').value = p.image_url;
+      document.getElementById('prodFileName').value = p.file_name || '';
+    }
+
+    function resetForm() {
+      document.getElementById('formTitle').textContent = 'Crear Producto Digital / Curso';
+      document.getElementById('productForm').reset();
+      document.getElementById('prodId').value = '';
+    }
+
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!authToken) {
+        alert('Debe iniciar sesión en el panel principal primero.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const payload = {
+        id: document.getElementById('prodId').value || undefined,
+        name: document.getElementById('prodName').value,
+        short_desc: document.getElementById('prodShortDesc').value,
+        price_guarani: Number(document.getElementById('prodPrice').value),
+        type: document.getElementById('prodType').value,
+        status: document.getElementById('prodStatus').value,
+        image_url: document.getElementById('prodImageUrl').value,
+        file_name: document.getElementById('prodFileName').value
+      };
+
+      try {
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert('¡Producto guardado exitosamente!');
+          resetForm();
+          loadProducts();
+        } else {
+          alert(data.error || 'Error al guardar producto.');
+        }
+      } catch (err) {
+        alert('Error de conexión.');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
+</body>
+</html>

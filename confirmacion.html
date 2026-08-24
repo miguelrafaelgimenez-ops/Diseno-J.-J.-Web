@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>¡Pedido Recibido! | Diseño J. J.</title>
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-dark: #040714;
+      --bg-secondary: #0b142d;
+      --bg-card: rgba(11, 20, 45, 0.85);
+      --color-electric-blue: #00d2ff;
+      --color-primary-blue: #0066ff;
+      --color-gold: #e5b869;
+      --text-white: #ffffff;
+      --text-muted: #cbd5e1;
+      --border-highlight: rgba(0, 210, 255, 0.45);
+      --font-heading: 'Outfit', system-ui, sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --radius-lg: 20px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-dark);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .confirm-card {
+      max-width: 580px;
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-highlight);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 0 45px rgba(0, 210, 255, 0.18);
+      position: relative;
+    }
+
+    .icon-box {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(0, 210, 255, 0.12);
+      border: 2px solid var(--color-electric-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem auto;
+      color: var(--color-electric-blue);
+    }
+
+    .confirm-title {
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 0.35rem;
+    }
+
+    .confirm-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .order-info-box {
+      background: #040817;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: left;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .order-info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+    }
+
+    .order-info-row:last-child {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      background: rgba(229, 184, 105, 0.15);
+      border: 1px solid var(--color-gold);
+      color: var(--color-gold);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .status-badge.PAID {
+      background: rgba(37, 211, 102, 0.15);
+      border-color: #25d366;
+      color: #25d366;
+    }
+
+    .status-badge.REJECTED {
+      background: rgba(255, 77, 77, 0.15);
+      border-color: #ff4d4d;
+      color: #ff4d4d;
+    }
+
+    .notice-box {
+      background: rgba(0, 210, 255, 0.06);
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      border-radius: 10px;
+      padding: 1rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.6rem;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--color-electric-blue) 0%, var(--color-primary-blue) 100%);
+      color: #040915;
+    }
+
+    .btn-wa {
+      background: #25d366;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="confirm-card">
+    <div class="icon-box">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+
+    <h1 class="confirm-title">¡Pedido Recibido!</h1>
+    <p class="confirm-subtitle">Gracias por elegir a Diseño J. J. Tu comprobante fue enviado correctamente.</p>
+
+    <div class="order-info-box">
+      <div class="order-info-row"><span>Número de Pedido:</span><b style="color: var(--color-electric-blue);"
+          id="displayCode">DJJ-2026-00000</b></div>
+      <div class="order-info-row"><span>Estado del Pago:</span><span class="status-badge" id="displayStatus">PAGO
+          PENDIENTE DE VERIFICACIÓN</span></div>
+      <div class="order-info-row"><span>Método:</span><b id="displayMethod">Transferencia / Giro</b></div>
+      <div class="order-info-row"><span>Monto Total:</span><b
+          style="color: var(--color-electric-blue); font-size: 1.05rem;" id="displayTotal">₲ 0</b></div>
+    </div>
+
+    <div class="notice-box">
+      <b style="color: #fff; display: block; margin-bottom: 0.25rem;">¿Qué sucede ahora?</b>
+      Tu comprobante fue recibido. Diseño J. J. verificará el pago y te enviará el producto digital o acceso al correo
+      electrónico proporcionado.
+    </div>
+
+    <div class="btn-group">
+      <a href="tienda.html" class="btn btn-primary">
+        <span>VOLVER A LA TIENDA</span>
+      </a>
+      <a href="https://wa.me/message/6LEPZNC677UDD1" target="_blank" rel="noopener noreferrer" class="btn btn-wa">
+        <span>SOPORTE POR WHATSAPP</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function formatGuarani(amount) {
+      return '₲ ' + Number(amount).toLocaleString('es-PY');
+    }
+
+    async function loadConfirmation() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      if (!code) return;
+
+      document.getElementById('displayCode').textContent = code;
+
+      try {
+        const res = await fetch(`/api/orders/status/${code}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.order) {
+            const o = data.order;
+            document.getElementById('displayTotal').textContent = formatGuarani(o.total_guarani);
+            document.getElementById('displayMethod').textContent = o.payment_method === 'TRANSFER' ? 'Transferencia Bancaria' : 'Giro Móvil';
+
+            const badge = document.getElementById('displayStatus');
+            if (o.status === 'PAID' || o.status === 'DELIVERED') {
+              badge.textContent = 'PAGO CONFIRMADO';
+              badge.className = 'status-badge PAID';
+            } else if (o.status === 'REJECTED') {
+              badge.textContent = 'PAGO RECHAZADO';
+              badge.className = 'status-badge REJECTED';
+            } else {
+              badge.textContent = 'PAGO PENDIENTE DE VERIFICACIÓN';
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Modo estático confirmación.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadConfirmation);
+  </script>
+</body>
+
+</html>
