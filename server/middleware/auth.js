@@ -2,9 +2,12 @@
 // Middleware to protect admin routes using JWT
 
 const jwt = require('jsonwebtoken');
-const secret = process.env.JWT_SECRET || 'your_secret_here';
+const secret = process.env.JWT_SECRET || '';
 
 function verifyAdmin(req, res, next) {
+  if (!secret) {
+    return res.status(503).json({ error: 'Autenticación no disponible: falta JWT_SECRET en el entorno.' });
+  }
   const authHeader = req.headers['authorization'];
   if (!authHeader) {
     return res.status(401).json({ error: 'Authorization header missing' });

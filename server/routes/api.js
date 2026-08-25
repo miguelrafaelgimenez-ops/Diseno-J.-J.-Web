@@ -3,18 +3,24 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
-const db = require('../database/db');
+const bcrypt = require('bcryptjs');
+const db = require('../database/sqlite');
 const emailService = require('../services/email');
 const paymentService = require('../services/payment');
+const { validateCustomerInput, validateQuantity } = require('../validation/order');
 
 require('dotenv').config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'diseno_jj_secret_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET || '';
 const STORAGE_FILES = path.join(__dirname, '../../storage/digital_files');
+const loginAttempts = new Map();
 if (!fs.existsSync(STORAGE_FILES)) fs.mkdirSync(STORAGE_FILES, { recursive: true });
 
 // Middleware de Autenticación de Administrador
 function requireAdminAuth(req, res, next) {
+  if (!JWT_SECRET) {
+    return res.status(503).json({ error: 'Autenticación no disponible: falta JWT_SECRET en el entorno.' });
+  }
   const authHeader = req.headers.authorization;
   let token = null;
 
@@ -75,9 +81,8 @@ router.post('/orders/create', async (req, res) => {
       cart_items
     } = req.body;
 
-    if (!customer_name || !customer_email || !customer_phone) {
-      return res.status(400).json({ error: 'Por favor complete todos los datos requeridos (Nombre, Email y Teléfono).' });
-    }
+    const customerError = validateCustomerInput({ customer_name, customer_email, customer_phone });
+    if (customerError) return res.status(400).json({ error: customerError });
 
     if (customer_email_confirm && customer_email.trim().toLowerCase() !== customer_email_confirm.trim().toLowerCase()) {
       return res.status(400).json({ error: 'La confirmación del correo electrónico no coincide.' });
@@ -103,7 +108,10 @@ router.post('/orders/create', async (req, res) => {
       if (!realProd || realProd.status !== 'ACTIVE') {
         return res.status(400).json({ error: `El producto '${item.name || item.product_name}' ya no está disponible.` });
       }
-      const qty = Math.max(1, Number(item.quantity) || 1);
+      const qty = validateQuantity(item.quantity);
+      if (!qty) {
+        return res.status(400).json({ error: 'La cantidad solicitada no es válida.' });
+      }
       const itemTotal = realProd.price_guarani * qty;
       calculatedTotal += itemTotal;
 
@@ -146,7 +154,7 @@ router.post('/orders/create', async (req, res) => {
 
   } catch (err) {
     console.error('[CREATE ORDER ERROR]', err);
-    res.status(500).json({ error: err.message || 'Error al generar la orden de pago.' });
+    res.status(err.statusCode || 500).json({ error: err.message || 'Error al generar la orden de pago.', code: err.code || 'ORDER_CREATE_ERROR' });
   }
 });
 
@@ -183,6 +191,10 @@ router.get('/orders/verify/:code', (req, res) => {
 // POST /api/payments/webhook - Notificación automática de pago aprobado
 router.post('/payments/webhook', async (req, res) => {
   try {
+    if (!paymentService.isConfigured()) {
+      return res.status(503).json({ error: 'Webhook no disponible: falta configurar la pasarela oficial.' });
+    }
+
     const payload = req.body;
     const sigHeader = req.headers['x-payment-signature'] || req.headers['x-pagopar-signature'];
 
@@ -266,14 +278,26 @@ router.get('/download/:token', (req, res) => {
       return res.status(403).send('El pago de este pedido no ha sido confirmado.');
     }
 
+    if (delivery.expires_at && new Date(delivery.expires_at) <= new Date()) {
+      return res.status(410).send('El enlace de descarga ha expirado.');
+    }
+
+    if (delivery.download_limit !== null && delivery.download_limit !== undefined && delivery.download_count >= delivery.download_limit) {
+      return res.status(403).send('Se alcanzó el límite de descargas de este enlace.');
+    }
+
     // Incrementar contador de descargas
-    db.incrementDownloadCount(delivery.id);
+    db.incrementDownloadCount(delivery.id, { ip: req.ip, userAgent: req.get('user-agent') });
 
     // Buscar si el producto tiene archivo físico
     const downloadItem = items[0];
     const productObj = db.getProductById(downloadItem.product_id);
     let targetFileName = productObj ? productObj.file_name : '';
-    let filePath = targetFileName ? path.join(STORAGE_FILES, targetFileName) : null;
+    const storageRoot = path.resolve(STORAGE_FILES);
+    let filePath = targetFileName ? path.resolve(storageRoot, targetFileName) : null;
+    if (filePath && (filePath !== storageRoot && !filePath.startsWith(`${storageRoot}${path.sep}`))) {
+      return res.status(400).send('Ruta de producto no válida.');
+    }
 
     if (filePath && fs.existsSync(filePath)) {
       return res.download(filePath, targetFileName);
@@ -320,17 +344,33 @@ router.get('/download/:token', (req, res) => {
 // ==========================================================================
 
 // POST /api/admin/login - Iniciar sesión de Administrador
-router.post('/admin/login', (req, res) => {
+router.post('/admin/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const envUser = process.env.ADMIN_USER || 'admin';
-    const envPass = process.env.ADMIN_PASS || 'admin123';
+    const clientKey = req.ip || req.socket.remoteAddress || 'unknown';
+    const attempt = loginAttempts.get(clientKey) || { count: 0, firstAt: Date.now() };
+    if (Date.now() - attempt.firstAt > 15 * 60 * 1000) {
+      attempt.count = 0;
+      attempt.firstAt = Date.now();
+    }
+    if (attempt.count >= 5) {
+      return res.status(429).json({ error: 'Demasiados intentos. Intente nuevamente más tarde.' });
+    }
 
-    const isValid = (username === envUser && password === envPass) || (username === 'admin' && password === 'admin123');
+    const { username, password } = req.body;
+    if (!JWT_SECRET || !process.env.ADMIN_USER || !process.env.ADMIN_PASSWORD_HASH) {
+      return res.status(503).json({ error: 'Administración no disponible: faltan secretos obligatorios en el entorno.' });
+    }
+
+    const envUser = process.env.ADMIN_USER;
+    const isValid = username === envUser && await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
 
     if (!isValid) {
+      attempt.count += 1;
+      loginAttempts.set(clientKey, attempt);
       return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
     }
+
+    loginAttempts.delete(clientKey);
 
     const token = jwt.sign({ username, role: 'admin' }, JWT_SECRET, { expiresIn: '24h' });
 

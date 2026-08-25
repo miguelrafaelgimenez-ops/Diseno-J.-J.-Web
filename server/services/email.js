@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const db = require('../database/db');
+const db = require('../database/sqlite');
 require('dotenv').config();
 
 // Configuración del servicio de correo
@@ -124,15 +124,15 @@ async function deliverEmail(orderId, to, subject, html) {
   const transporter = createTransporter();
   
   if (!transporter) {
-    console.log(`[SIMULACIÓN EMAIL] Hacia: ${to} | Asunto: ${subject}`);
+    console.error(`[EMAIL NO CONFIGURADO] No se pudo enviar a: ${to} | Asunto: ${subject}`);
     db.logEmail({
       order_id: orderId,
       email_to: to,
       subject,
-      status: 'SIMULATED',
-      error_message: 'Servidor SMTP no configurado en .env (Simulación limpia)'
+      status: 'EMAIL_FAILED',
+      error_message: 'Servidor SMTP no configurado en .env'
     });
-    return { success: true, simulated: true };
+    return { success: false, code: 'EMAIL_NOT_CONFIGURED' };
   }
 
   try {
@@ -147,7 +147,7 @@ async function deliverEmail(orderId, to, subject, html) {
       order_id: orderId,
       email_to: to,
       subject,
-      status: 'SENT',
+      status: 'EMAIL_SENT',
       error_message: ''
     });
 
@@ -158,7 +158,7 @@ async function deliverEmail(orderId, to, subject, html) {
       order_id: orderId,
       email_to: to,
       subject,
-      status: 'FAILED',
+      status: 'EMAIL_FAILED',
       error_message: error.message
     });
     return { success: false, error: error.message };

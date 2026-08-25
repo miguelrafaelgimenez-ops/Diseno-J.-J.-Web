@@ -13,6 +13,7 @@ storage/digital_files/*
 storage/payment_proofs/*
 !storage/payment_proofs/.gitkeep
 server/database/diseno_jj.db
+server/database/diseno_jj_data.json
 
 # Sistema Operativo y Editor
 .DS_Store

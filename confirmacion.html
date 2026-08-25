@@ -244,28 +244,10 @@
     async function checkOrderStatus() {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
-      const session = urlParams.get('session');
-      const sig = urlParams.get('sig');
 
       if (!code) return;
 
       document.getElementById('displayCode').textContent = code;
-
-      // Si viene con firma de retorno de pasarela, auto-confirmar vía webhook
-      if (session && sig) {
-        try {
-          await fetch('/api/payments/webhook', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              order_code: code,
-              transaction_id: session,
-              status: 'APPROVED',
-              signature: sig
-            })
-          });
-        } catch (e) {}
-      }
 
       try {
         const res = await fetch(`/api/orders/verify/${code}`);

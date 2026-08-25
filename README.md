@@ -42,8 +42,9 @@ CLIENTE DESCARGA SU ARCHIVO O ACCEDE A SU CURSO
 - **Paleta Oficial:** Azul oscuro (`#040714`, `#070d1e`, `#0b142d`), Azul eléctrico (`#00d2ff`, `#0066ff`), Blanco de alto contraste y acentos dorados (`#e5b869`).
 - **Tipografía:** Google Fonts (*Outfit* para títulos y *Plus Jakarta Sans* para textos).
 - **Frontend:** HTML5 semántico, CSS3 nativo (Variables CSS, Flexbox, Grid responsive) y JavaScript Vanilla modular.
-- **Backend:** Node.js, Express, Webhooks criptográficos HMAC SHA-256, JWT para administración y Nodemailer (SMTP).
-- **Persistencia:** Base de datos relacional y estructurada (`server/database/db.js`).
+- **Backend:** Node.js, Express, JWT para administración y Nodemailer (SMTP).
+- **Persistencia actual:** SQLite transaccional mediante `better-sqlite3` (`server/database/sqlite.js`), con importación inicial segura desde el JSON legado si existe.
+- **Pagos:** BLOQUEADOS hasta integrar un adaptador oficial y credenciales reales. No se simulan pagos.
 
 ---
 
@@ -56,7 +57,7 @@ CLIENTE DESCARGA SU ARCHIVO O ACCEDE A SU CURSO
 | 📦 **[catalogo.html](catalogo.html)** | **Catálogo Comercial** | Catálogo comercial de equipos (DTF, grabadoras láser fibra/portátil), combos de sublimación e insumos. |
 | 🛒 **[tienda.html](tienda.html)** | **Tienda Digital** | Catálogo interactivo de productos digitales descargables (packs, vectores, plantillas) y cursos online en Guaraníes. |
 | 💳 **[checkout.html](checkout.html)** | **Checkout Online** | Formulario de facturación, confirmación de correo y conexión directa a pasarela de pagos. |
-| ✅ **[confirmacion.html](confirmacion.html)** | **Estado de Compra** | Verificación en tiempo real del Webhook y botón de descarga directa inmediata. |
+| ✅ **[confirmacion.html](confirmacion.html)** | **Estado de Compra** | Consulta el estado almacenado del pedido; no confirma pagos desde el navegador. |
 | 🔒 **[admin/index.html](admin/index.html)** | **Panel de Ventas** | Dashboard con métricas automáticas (Ventas de Hoy, Mes, Total Ingresos, Pedidos Confirmados) y reenvío de correos. |
 | 📦 **[admin/productos.html](admin/productos.html)** | **Gestión Productos** | Crear, editar y administrar precios, descripciones y tipos de productos digitales. |
 
@@ -70,18 +71,20 @@ npm install
 ```
 
 ### 2. Variables de Entorno (`.env`)
-Copia `.env.example` a `.env` y configura tus credenciales reales:
+Copia `.env.example` a `.env`. Los secretos son obligatorios para activar administración, SMTP o una futura pasarela:
 ```env
 PORT=5000
 NODE_ENV=production
 BASE_URL=https://tudominio.com
-JWT_SECRET=clave_secreta_jwt_para_admin
+JWT_SECRET=
+DATABASE_URL=
+CORS_ORIGIN=http://localhost:5000
 
-# PASARELA DE PAGO (PARAGUAY & INTERNACIONAL)
-PAYMENT_GATEWAY=PAGOPAR
-PAYMENT_PUBLIC_KEY=tu_public_key_de_pasarela
-PAYMENT_PRIVATE_KEY=tu_private_key_de_pasarela
-PAYMENT_WEBHOOK_SECRET=tu_secreto_para_firma_de_webhook
+# PASARELA: pendiente de adaptador oficial y credenciales
+PAYMENT_GATEWAY=
+PAYMENT_PUBLIC_KEY=
+PAYMENT_PRIVATE_KEY=
+PAYMENT_WEBHOOK_SECRET=
 
 # SERVIDOR DE CORREO ELECTRÓNICO (SMTP / GMAIL)
 EMAIL_HOST=smtp.gmail.com
@@ -91,9 +94,9 @@ EMAIL_USER=tu_correo@gmail.com
 EMAIL_PASS=tu_app_password
 EMAIL_FROM="Diseño J. J. <tu_correo@gmail.com>"
 
-# ACCESO ADMINISTRADOR POR DEFECTO
-ADMIN_USER=admin
-ADMIN_PASS=admin_password_seguro
+# Bootstrap administrativo: no usar valores por defecto ni almacenarlos en HTML
+ADMIN_USER=
+ADMIN_PASSWORD_HASH=
 ```
 
 ### 3. Iniciar Servidor
@@ -103,11 +106,21 @@ npm start
 
 ---
 
-## 🔒 Seguridad y Prevención de Fraude
-- **Validación de Precios en Servidor:** El servidor recalcula siempre los importes desde la base de datos, impidiendo alteraciones desde herramientas de desarrollador en el navegador.
-- **Validación Criptográfica de Webhooks:** Se valida la firma HMAC SHA-256 o hash de la pasarela antes de procesar cualquier notificación de pago.
-- **Idempotencia Estricta:** Las notificaciones duplicadas de webhooks se reconocen y no duplican entregas ni envíos de correos.
-- **Archivos Protegidos:** Los archivos descargables se almacenan en `storage/digital_files/` y únicamente se sirven a través de tokens únicos temporales generados tras confirmarse el pago.
+## 🔒 Estado de seguridad e infraestructura
+
+- Los precios y totales se reconstruyen en backend a partir de IDs de productos.
+- La confirmación de pago desde frontend está bloqueada.
+- El webhook permanece bloqueado hasta configurar un adaptador oficial.
+- Los tokens de descarga se diseñan con hash criptográfico y la descarga valida asociación, estado y path.
+- El almacenamiento externo privado, SMTP real y proveedor de pagos están pendientes de configuración.
+- La base de datos SQLite se puede migrar posteriormente a un proveedor SQL gestionado; aún no es una configuración de producción serverless.
+
+## 📚 Migraciones y pruebas
+
+- Esquema SQL de referencia: `server/database/schema.sql`.
+- Esquema SQLite transaccional y migración de productos: `server/database/sqlite.js`.
+- Pruebas preparadas: `tests/payment-boundary.test.js`.
+- Las pruebas no se han ejecutado porque Node.js/npm no están disponibles en el entorno actual.
 
 ---
 

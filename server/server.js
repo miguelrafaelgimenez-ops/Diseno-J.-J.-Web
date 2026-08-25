@@ -7,10 +7,15 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middlewares Globales
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// CORS explícito: en desarrollo se permite el origen del propio servidor;
+// en producción debe declararse CORS_ORIGIN sin usar un comodín.
+const allowedOrigins = (process.env.CORS_ORIGIN || `http://localhost:${PORT}`).split(',').map(origin => origin.trim()).filter(Boolean);
+app.use(cors({ origin: (origin, callback) => {
+  if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+  return callback(new Error('Origen no permitido por CORS.'));
+} }));
+app.use(express.json({ limit: '256kb' }));
+app.use(express.urlencoded({ extended: true, limit: '256kb' }));
 
 // Rutas de API
 app.use('/api', apiRoutes);

@@ -691,72 +691,26 @@
   <script src="assets/js/cart.js"></script>
 
   <script>
-    // Datos de productos por defecto (en caso de consulta estática o servidor local API)
-    const fallbackProducts = [
-      {
-        id: 1,
-        name: "Pack Mega Redes Sociales 2026",
-        short_desc: "150+ plantillas editables para Instagram, Facebook y TikTok.",
-        description: "Más de 150 plantillas editables y recursos vectoriales para publicidad en Instagram, Facebook y TikTok.",
-        price_guarani: 50000,
-        image_url: "assets/trabajos/trabajo-canva-11.webp",
-        type: "DOWNLOAD"
-      },
-      {
-        id: 2,
-        name: "Kit de Marcas & Logotipos Vectoriales",
-        short_desc: "Colección de vectores y elementos de branding corporativo.",
-        description: "Colección exclusiva de isotipos, tipografías corporativas, manuales de marca e insumos visuales.",
-        price_guarani: 75000,
-        image_url: "assets/trabajos/trabajo-canva-19.webp",
-        type: "DOWNLOAD"
-      },
-      {
-        id: 3,
-        name: "Curso Online: Publicidad Visual de Alto Impacto",
-        short_desc: "Aprende a diseñar campañas y publicidad que vende.",
-        description: "Aprende paso a paso a diseñar campañas publicitarias efectivas para redes sociales y composición visual.",
-        price_guarani: 120000,
-        image_url: "assets/trabajos/trabajo-canva-8.webp",
-        type: "COURSE"
-      },
-      {
-        id: 4,
-        name: "Pack Gastronomía & Menús Restaurante",
-        short_desc: "Diseños de menús, promociones y flyers gastronómicos.",
-        description: "Plantillas de cartas, menús, promociones para comida rápida, bares y restaurantes.",
-        price_guarani: 60000,
-        image_url: "assets/trabajos/trabajo-canva-30.webp",
-        type: "DOWNLOAD"
-      },
-      {
-        id: 5,
-        name: "Vectores Grabado Láser & Rotativo 360°",
-        short_desc: "Diseños listos para grabado láser en termos y vasos.",
-        description: "Diseños vectoriales listos para grabado en fibra óptica o CO2 sobre termos y vasos térmicos.",
-        price_guarani: 85000,
-        image_url: "assets/catalogo/trabajo-p8-1.webp",
-        type: "DOWNLOAD"
-      }
-    ];
-
-    let allDigitalProducts = [...fallbackProducts];
+    // El backend es la única fuente de verdad de productos y precios.
+    let allDigitalProducts = [];
 
     const productsGrid = document.getElementById('productsGrid');
     const filterBtns = document.querySelectorAll('.filter-btn');
 
-    // Cargar productos desde API o fallback
+    // Cargar productos desde la API; no se usan precios fallback del frontend.
     async function loadProducts() {
       try {
         const res = await fetch('/api/products');
         if (res.ok) {
           const data = await res.json();
-          if (data.products && data.products.length > 0) {
-            allDigitalProducts = data.products;
-          }
+          allDigitalProducts = Array.isArray(data.products) ? data.products : [];
+        } else {
+          throw new Error('No se pudo cargar el catálogo.');
         }
       } catch (e) {
-        console.log('Usando datos de tienda local.');
+        allDigitalProducts = [];
+        productsGrid.innerHTML = '<p class="empty-state">El catálogo no está disponible temporalmente.</p>';
+        return;
       }
       renderProducts('all');
     }
