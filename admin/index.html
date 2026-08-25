@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Diseño J. J. — Administración de Ventas</title>
+  <title>Diseño J. J. — Administración de Ventas Digitales</title>
   <link rel="icon" type="image/png" href="../assets/logo.png" />
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -82,7 +82,7 @@
     .status-pill { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 800; }
     .status-pill.PENDING { background: rgba(229, 184, 105, 0.18); color: var(--color-gold); }
     .status-pill.PAID, .status-pill.DELIVERED { background: rgba(37, 211, 102, 0.18); color: var(--color-green); }
-    .status-pill.REJECTED { background: rgba(255, 77, 77, 0.18); color: var(--color-red); }
+    .status-pill.FAILED, .status-pill.CANCELLED { background: rgba(255, 77, 77, 0.18); color: var(--color-red); }
 
     /* MODAL DETALLE DE PEDIDO */
     .modal-overlay {
@@ -104,7 +104,7 @@
   <div class="login-overlay" id="adminLoginOverlay">
     <form class="login-box" id="adminLoginForm">
       <img src="../assets/logo.png" alt="Diseño J. J." style="width: 50px; margin: 0 auto 0.75rem auto;" />
-      <h2 style="font-family: var(--font-heading); margin-bottom: 0.25rem;">Administración</h2>
+      <h2 style="font-family: var(--font-heading); margin-bottom: 0.25rem;">Panel de Control</h2>
       <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Diseño J. J. — Ventas Digitales</p>
       
       <input type="text" id="loginUsername" class="form-input" placeholder="Usuario" value="admin" required />
@@ -119,12 +119,12 @@
     <div class="container admin-nav">
       <div style="display: flex; align-items: center; gap: 0.75rem;">
         <img src="../assets/logo.png" alt="Diseño J. J." style="width: 32px;" />
-        <span style="font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem;">Diseño J. J. | Admin</span>
+        <span style="font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem;">Diseño J. J. | Admin Automático</span>
       </div>
 
       <div class="admin-nav-links">
-        <a href="index.html" class="admin-nav-link active">Pedidos &amp; Ventas</a>
-        <a href="productos.html" class="admin-nav-link">Productos Digitales</a>
+        <a href="index.html" class="admin-nav-link active">Ventas Online</a>
+        <a href="productos.html" class="admin-nav-link">Productos &amp; Cursos</a>
         <button onclick="logoutAdmin()" class="btn btn-secondary" style="padding: 0.4rem 0.9rem; font-size: 0.8rem;">Cerrar Sesión</button>
       </div>
     </div>
@@ -134,30 +134,29 @@
     <!-- DASHBOARD STATS -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-title">Ingresos Totales</div>
+        <div class="stat-title">Ingresos Totales (₲)</div>
         <div class="stat-val" style="color: var(--color-electric-blue);" id="statIncome">₲ 0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-title">Pendientes de Pago</div>
-        <div class="stat-val" style="color: var(--color-gold);" id="statPending">0</div>
+        <div class="stat-title">Ventas de Hoy</div>
+        <div class="stat-val" style="color: var(--color-green);" id="statTodayIncome">₲ 0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-title">Pagados / Aprobados</div>
-        <div class="stat-val" style="color: var(--color-green);" id="statPaid">0</div>
+        <div class="stat-title">Ventas del Mes</div>
+        <div class="stat-val" style="color: #38bdf8;" id="statMonthIncome">₲ 0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-title">Rechazados</div>
-        <div class="stat-val" style="color: var(--color-red);" id="statRejected">0</div>
+        <div class="stat-title">Pedidos Confirmados</div>
+        <div class="stat-val" style="color: var(--color-gold);" id="statPaidCount">0</div>
       </div>
     </div>
 
-    <!-- TABLA DE PEDIDOS -->
+    <!-- TABLA DE VENTAS -->
     <div class="table-container">
       <div class="table-tabs">
         <button class="table-tab-btn active" onclick="filterOrders('ALL', this)">TODOS</button>
+        <button class="table-tab-btn" onclick="filterOrders('PAID', this)">PAGADOS ONLINE</button>
         <button class="table-tab-btn" onclick="filterOrders('PENDING', this)">PENDIENTES</button>
-        <button class="table-tab-btn" onclick="filterOrders('PAID', this)">APROBADOS</button>
-        <button class="table-tab-btn" onclick="filterOrders('REJECTED', this)">RECHAZADOS</button>
       </div>
 
       <table>
@@ -165,9 +164,9 @@
           <tr>
             <th>Código Pedido</th>
             <th>Cliente</th>
-            <th>Teléfono / Email</th>
-            <th>Pago</th>
-            <th>Total (₲)</th>
+            <th>Email</th>
+            <th>Total</th>
+            <th>Pasarela</th>
             <th>Estado</th>
             <th>Acción</th>
           </tr>
@@ -179,95 +178,100 @@
     </div>
   </main>
 
-  <!-- MODAL REVISIÓN DE PEDIDO -->
+  <!-- MODAL DETALLE DE PEDIDO -->
   <div class="modal-overlay" id="orderModal">
     <div class="modal-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-        <h2 style="font-family: var(--font-heading); font-size: 1.35rem;" id="modalOrderCode">DJJ-2026-XXXXX</h2>
-        <button onclick="closeModal()" style="background: transparent; border: none; color: #fff; cursor: pointer;">✕</button>
+        <h3 style="font-family: var(--font-heading); color: #fff;" id="modalOrderCode">Detalle del Pedido</h3>
+        <button onclick="closeModal()" style="background: transparent; border: none; color: #fff; font-size: 1.2rem; cursor: pointer;">✕</button>
       </div>
 
       <div id="modalOrderContent">
-        <!-- Contenido dinámico -->
+        <!-- Renderizado dinámico -->
       </div>
     </div>
   </div>
 
   <script>
     let authToken = localStorage.getItem('diseno_jj_admin_token') || '';
-    let currentFilterStatus = null;
     let allOrdersData = [];
 
     function formatGuarani(amount) {
       return '₲ ' + Number(amount).toLocaleString('es-PY');
     }
 
-    // Login Form Submit
+    // Login Admin
     document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const u = document.getElementById('loginUsername').value;
-      const p = document.getElementById('loginPassword').value;
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
 
       try {
         const res = await fetch('/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: u, password: p })
+          body: JSON.stringify({ username, password })
         });
         const data = await res.json();
-        if (res.ok && data.token) {
+
+        if (res.ok && data.success) {
           authToken = data.token;
           localStorage.setItem('diseno_jj_admin_token', authToken);
           document.getElementById('adminLoginOverlay').style.display = 'none';
           loadAdminDashboard();
         } else {
-          alert(data.error || 'Credenciales incorrectas.');
+          alert(data.error || 'Credenciales incorrectas');
         }
       } catch (err) {
-        alert('Error al conectar con el servidor.');
+        alert('Error conectando al servidor.');
       }
     });
 
     function logoutAdmin() {
       localStorage.removeItem('diseno_jj_admin_token');
-      location.reload();
+      authToken = '';
+      document.getElementById('adminLoginOverlay').style.display = 'flex';
     }
 
-    async function loadAdminDashboard() {
-      if (!authToken) return;
+    async function loadAdminDashboard(statusFilter = 'ALL') {
+      if (!authToken) {
+        document.getElementById('adminLoginOverlay').style.display = 'flex';
+        return;
+      }
       document.getElementById('adminLoginOverlay').style.display = 'none';
 
       try {
-        const res = await fetch('/api/admin/orders', {
+        const res = await fetch(`/api/admin/dashboard?status=${statusFilter}`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
-        
+
         if (res.status === 401) {
-          document.getElementById('adminLoginOverlay').style.display = 'flex';
+          logoutAdmin();
           return;
         }
 
         const data = await res.json();
-        if (data.success) {
-          allOrdersData = data.orders;
-          
-          // Actualizar Estadísticas
-          document.getElementById('statIncome').textContent = formatGuarani(data.stats.total_income_guarani);
-          document.getElementById('statPending').textContent = data.stats.pending;
-          document.getElementById('statPaid').textContent = data.stats.paid;
-          document.getElementById('statRejected').textContent = data.stats.rejected;
 
-          renderTable(allOrdersData);
+        if (res.ok && data.success) {
+          // Actualizar Estadísticas Automáticas
+          const m = data.metrics;
+          document.getElementById('statIncome').textContent = formatGuarani(m.total_income);
+          document.getElementById('statTodayIncome').textContent = formatGuarani(m.today_income);
+          document.getElementById('statMonthIncome').textContent = formatGuarani(m.month_income);
+          document.getElementById('statPaidCount').textContent = m.paid_orders_count;
+
+          allOrdersData = data.orders;
+          renderOrdersTable(data.orders);
         }
       } catch (err) {
-        console.error('Error al cargar pedidos.');
+        console.error('Error cargando dashboard', err);
       }
     }
 
-    function renderTable(orders) {
+    function renderOrdersTable(orders) {
       const tbody = document.getElementById('ordersTableBody');
       if (orders.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No hay pedidos en esta categoría.</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay registros en esta sección.</td></tr>';
         return;
       }
 
@@ -275,11 +279,13 @@
         <tr>
           <td><b style="color: var(--color-electric-blue);">${o.order_code}</b></td>
           <td>${o.customer_name}</td>
-          <td>${o.customer_phone}<br/><span style="font-size: 0.8rem; color: var(--text-muted);">${o.customer_email}</span></td>
-          <td>${o.payment_method === 'TRANSFER' ? 'Transferencia' : 'Giro'}</td>
+          <td>${o.customer_email}</td>
           <td><b>${formatGuarani(o.total_guarani)}</b></td>
-          <td><span class="status-pill ${o.status}">${o.status === 'PENDING' ? 'PENDIENTE' : (o.status === 'PAID' ? 'APROBADO' : 'RECHAZADO')}</span></td>
-          <td><button class="btn btn-secondary" onclick="openOrderModal(${o.id})" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;">REVISAR</button></td>
+          <td><span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">${o.payment_gateway}</span></td>
+          <td><span class="status-pill ${o.status}">${o.status === 'PAID' ? 'PAGADO (ONLINE)' : o.status}</span></td>
+          <td>
+            <button class="btn btn-secondary" style="padding: 0.35rem 0.8rem; font-size: 0.8rem;" onclick="openOrderModal(${o.id})">VER DETALLE</button>
+          </td>
         </tr>
       `).join('');
     }
@@ -287,60 +293,44 @@
     function filterOrders(status, btn) {
       document.querySelectorAll('.table-tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
-      if (status === 'ALL') {
-        renderTable(allOrdersData);
-      } else if (status === 'PAID') {
-        renderTable(allOrdersData.filter(o => o.status === 'PAID' || o.status === 'DELIVERED'));
-      } else {
-        renderTable(allOrdersData.filter(o => o.status === status));
-      }
+      loadAdminDashboard(status);
     }
 
-    async function openOrderModal(orderId) {
+    function openOrderModal(orderId) {
       const order = allOrdersData.find(o => o.id === orderId);
       if (!order) return;
 
       document.getElementById('modalOrderCode').textContent = `Pedido: ${order.order_code}`;
       const content = document.getElementById('modalOrderContent');
 
-      const itemsList = order.items.map(i => `<li><b>${i.product_name}</b> x${i.quantity} — ${formatGuarani(i.price_guarani)}</li>`).join('');
+      const itemsList = order.items.map(i => `<li><b>${i.product_name}</b> x${i.quantity} — ${formatGuarani(i.price_guarani * i.quantity)}</li>`).join('');
 
       content.innerHTML = `
         <div style="margin-bottom: 1rem; font-size: 0.95rem;">
           <p><b>Cliente:</b> ${order.customer_name}</p>
           <p><b>Email:</b> ${order.customer_email}</p>
           <p><b>Teléfono:</b> ${order.customer_phone}</p>
-          <p><b>Método de Pago:</b> ${order.payment_method === 'TRANSFER' ? 'Transferencia Bancaria' : 'Giro Móvil'}</p>
-          <p><b>Fecha:</b> ${new Date(order.created_at).toLocaleString()}</p>
+          <p><b>Pasarela:</b> ${order.payment_gateway}</p>
+          <p><b>ID Transacción:</b> ${order.transaction_id || 'N/A'}</p>
+          <p><b>Fecha de Creación:</b> ${new Date(order.created_at).toLocaleString()}</p>
+          ${order.paid_at ? `<p><b>Fecha de Pago Confirmado:</b> <span style="color:var(--color-green); font-weight:bold;">${new Date(order.paid_at).toLocaleString()}</span></p>` : ''}
         </div>
 
         <div style="background: #040817; padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem;">
-          <h4 style="color: var(--color-electric-blue); margin-bottom: 0.5rem;">Productos del Pedido:</h4>
+          <h4 style="color: var(--color-electric-blue); margin-bottom: 0.5rem;">Productos Comprados:</h4>
           <ul>${itemsList}</ul>
           <h3 style="margin-top: 0.75rem; color: #fff;">Total: ${formatGuarani(order.total_guarani)}</h3>
         </div>
 
-        <div style="margin-bottom: 1.5rem;">
-          <h4 style="margin-bottom: 0.5rem;">Comprobante de Pago Subido:</h4>
-          ${order.proof_file_name ? `
-            <a href="/api/admin/proofs/${order.proof_file_name}?token=${authToken}" target="_blank" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-              <span>VER COMPROBANTE DE PAGO</span>
-            </a>
-          ` : '<p style="color: var(--color-red);">Sin comprobante adjunto</p>'}
+        <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div><b>Estado de Pago:</b> <span class="status-pill ${order.status}">${order.status}</span></div>
+            <div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-muted);">Entrega Digital: <b>${order.delivery_status}</b></div>
+          </div>
+          ${(order.status === 'PAID' || order.status === 'DELIVERED') ? `
+            <button class="btn btn-primary" onclick="resendDeliveryEmail(${order.id})">REENVIAR CORREO AL CLIENTE</button>
+          ` : ''}
         </div>
-
-        ${order.status === 'PENDING' ? `
-          <div style="display: flex; gap: 0.75rem; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
-            <button class="btn btn-danger" onclick="rejectOrder(${order.id})">RECHAZAR PAGO</button>
-            <button class="btn btn-success" onclick="approveOrder(${order.id})">APROBAR PAGO Y ENTREGAR</button>
-          </div>
-        ` : `
-          <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 8px; font-weight: 700; text-align: center;">
-            Estado Actual: <span class="status-pill ${order.status}">${order.status}</span>
-          </div>
-        `}
       `;
 
       document.getElementById('orderModal').classList.add('is-open');
@@ -350,50 +340,22 @@
       document.getElementById('orderModal').classList.remove('is-open');
     }
 
-    async function approveOrder(orderId) {
-      if (!confirm('¿Confirmar que el pago fue recibido en la cuenta de Diseño J. J.?')) return;
+    async function resendDeliveryEmail(orderId) {
+      if (!confirm('¿Deseas reenviar el correo con los enlaces de descarga al cliente?')) return;
 
       try {
-        const res = await fetch(`/api/admin/orders/${orderId}/approve`, {
+        const res = await fetch(`/api/admin/orders/${orderId}/resend`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const data = await res.json();
         if (res.ok && data.success) {
-          alert('¡Pago APROBADO correctamente! El correo de entrega fue enviado al cliente.');
-          closeModal();
-          loadAdminDashboard();
+          alert(data.message);
         } else {
-          alert(data.error || 'Error al aprobar pedido.');
+          alert(data.error || 'Error al reenviar correo.');
         }
-      } catch (err) {
-        alert('Error de comunicación con el servidor.');
-      }
-    }
-
-    async function rejectOrder(orderId) {
-      const reason = prompt('Indique el motivo del rechazo del comprobante:');
-      if (reason === null) return;
-
-      try {
-        const res = await fetch(`/api/admin/orders/${orderId}/reject`, {
-          method: 'POST',
-          headers: { 
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ reason })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          alert('Pedido RECHAZADO.');
-          closeModal();
-          loadAdminDashboard();
-        } else {
-          alert(data.error || 'Error al rechazar pedido.');
-        }
-      } catch (err) {
-        alert('Error de comunicación con el servidor.');
+      } catch (e) {
+        alert('Error de conexión.');
       }
     }
 

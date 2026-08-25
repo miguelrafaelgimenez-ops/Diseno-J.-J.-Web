@@ -7,6 +7,12 @@
   <title>Portafolio de Trabajos | Diseño J. J. — Somos tu aliado creativo</title>
   <meta name="description"
     content="Portafolio oficial de Diseño J. J. — Diseños publicitarios, flyers, piezas para redes sociales, gastronomía, eventos y branding." />
+  <meta name="theme-color" content="#040714" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Portafolio de Trabajos | Diseño J. J." />
+  <meta property="og:description"
+    content="Explora trabajos de publicidad, redes sociales, gastronomía, eventos y branding realizados por Diseño J. J." />
+  <meta property="og:image" content="assets/logo.png" />
   <link rel="icon" type="image/png" href="assets/logo.png" />
 
   <!-- Tipografía Google Fonts -->
@@ -879,15 +885,15 @@
         <span class="logo-name">DISEÑO J. J.</span>
       </a>
 
-      <div class="nav-right" style="align-self: unset;">
-        <a href="#inicio" class="nav-link active">Inicio</a>
-        <a href="#servicios" class="nav-link">Qué hacemos</a>
-        <a href="#trabajos" class="nav-link">Trabajos</a>
+      <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+        <a href="index.html#inicio" class="nav-link">Inicio</a>
+        <a href="index.html#servicios" class="nav-link">Qué hacemos</a>
+        <a href="#portafolio" class="nav-link active" aria-current="page">Trabajos</a>
         <a href="tienda.html" class="nav-link">Tienda Digital</a>
-        <a href="#lo-ultimo" class="nav-link">Lo último</a>
-        <a href="#redes" class="nav-link">Redes</a>
+        <a href="index.html#lo-ultimo" class="nav-link">Lo último</a>
+        <a href="index.html#redes" class="nav-link">Redes</a>
         <a href="#contacto" class="nav-link">Contacto</a>
-        </nav>
+      </nav>
 
         <button class="cart-btn-trigger" id="cartToggleBtn" aria-label="Abrir Carrito de Compras"
           style="background: rgba(0, 210, 255, 0.1); border: 1px solid rgba(0, 210, 255, 0.25); color: #00d2ff; padding: 0.45rem 0.95rem; border-radius: 99px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: all 0.25s ease;">
@@ -907,7 +913,7 @@
           <span class="hamburger-line"></span>
           <span class="hamburger-line"></span>
         </button>
-      </div>
+    </div>
   </header>
 
   <main role="main">
@@ -924,13 +930,13 @@
 
         <!-- FILTROS DE CATEGORÍAS -->
         <div class="filter-container">
-          <div class="filter-wrapper" role="tablist" aria-label="Filtros del portafolio">
-            <button class="filter-btn active" data-filter="all">TODOS</button>
-            <button class="filter-btn" data-filter="flyers">FLYERS &amp; PUBLICIDAD</button>
-            <button class="filter-btn" data-filter="redes-sociales">REDES SOCIALES</button>
-            <button class="filter-btn" data-filter="gastronomia">GASTRONOMÍA &amp; EVENTOS</button>
-            <button class="filter-btn" data-filter="branding">BRANDING &amp; LOGOS</button>
-            <button class="filter-btn" data-filter="promocionales">PROMOCIONALES</button>
+          <div class="filter-wrapper" role="group" aria-label="Filtros del portafolio">
+            <button class="filter-btn active" data-filter="all" aria-pressed="true">TODOS</button>
+            <button class="filter-btn" data-filter="flyers" aria-pressed="false">FLYERS &amp; PUBLICIDAD</button>
+            <button class="filter-btn" data-filter="redes-sociales" aria-pressed="false">REDES SOCIALES</button>
+            <button class="filter-btn" data-filter="gastronomia" aria-pressed="false">GASTRONOMÍA &amp; EVENTOS</button>
+            <button class="filter-btn" data-filter="branding" aria-pressed="false">BRANDING &amp; LOGOS</button>
+            <button class="filter-btn" data-filter="promocionales" aria-pressed="false">PROMOCIONALES</button>
           </div>
         </div>
 
@@ -1311,8 +1317,10 @@
       filterButtons.forEach(btn => {
         if (btn.getAttribute('data-filter') === category) {
           btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
         } else {
           btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', 'false');
         }
       });
 
@@ -1391,7 +1399,7 @@
     });
   </script>
 
-  <!-- DRAWER LATERAL DEL CARRITO -->
+    <!-- DRAWER LATERAL DEL CARRITO -->
   <div class="cart-drawer-overlay" id="cartDrawerOverlay" style="position: fixed; inset: 0; background: rgba(3, 6, 16, 0.82); backdrop-filter: blur(12px); z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.25s, visibility 0.25s;">
     <div style="position: fixed; top: 0; right: 0; width: 100%; max-width: 420px; height: 100vh; background: #0b142d; border-left: 1px solid rgba(0, 210, 255, 0.45); z-index: 2001; display: flex; flex-direction: column; box-shadow: -10px 0 35px rgba(0, 0, 0, 0.8);">
       <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(0, 210, 255, 0.16); display: flex; align-items: center; justify-content: space-between; background: #070d1e;">
@@ -1410,7 +1418,6 @@
   </div>
 
   <!-- MÓDULO DE CARRITO DE COMPRAS -->
-  <script src="assets/js/cart.js"></script>
 
   <script>
     // Menú Móvil
@@ -1427,6 +1434,7 @@
       link.addEventListener('click', () => {
         navMenu.classList.remove('is-active');
         hamburgerBtn.classList.remove('is-active');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
       });
     });
   </script>

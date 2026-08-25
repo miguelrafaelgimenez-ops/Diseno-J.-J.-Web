@@ -7,6 +7,12 @@
   <title>Catálogo Digital | Diseño J. J. — Somos tu aliado creativo</title>
   <meta name="description"
     content="Catálogo digital de Diseño J. J. — Equipos, insumos, combos de sublimación, grabado láser y paquetes digitales." />
+  <meta name="theme-color" content="#040714" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Catálogo Digital | Diseño J. J." />
+  <meta property="og:description"
+    content="Consulta el catálogo de Diseño J. J.: soluciones de diseño, equipos, insumos, grabado láser y paquetes digitales." />
+  <meta property="og:image" content="assets/logo.png" />
   <link rel="icon" type="image/png" href="assets/logo.png" />
 
   <!-- Tipografía Google Fonts -->
@@ -829,12 +835,12 @@
       </a>
 
       <nav class="nav-menu" id="navMenu" role="navigation" aria-label="Navegación principal">
-        <a href="#inicio" class="nav-link active">Inicio</a>
-        <a href="#servicios" class="nav-link">Qué hacemos</a>
-        <a href="#trabajos" class="nav-link">Trabajos</a>
+        <a href="index.html#inicio" class="nav-link">Inicio</a>
+        <a href="index.html#servicios" class="nav-link">Qué hacemos</a>
+        <a href="trabajos.html" class="nav-link">Trabajos</a>
         <a href="tienda.html" class="nav-link">Tienda Digital</a>
-        <a href="#lo-ultimo" class="nav-link">Lo último</a>
-        <a href="#redes" class="nav-link">Redes</a>
+        <a href="index.html#lo-ultimo" class="nav-link">Lo último</a>
+        <a href="index.html#redes" class="nav-link">Redes</a>
         <a href="#contacto" class="nav-link">Contacto</a>
       </nav>
 
@@ -872,13 +878,13 @@
 
         <!-- FILTROS DE CATEGORÍAS -->
         <div class="filter-container">
-          <div class="filter-wrapper" role="tablist" aria-label="Filtros del catálogo">
-            <button class="filter-btn active" data-filter="all">TODOS</button>
-            <button class="filter-btn" data-filter="diseno-grafico">DISEÑO GRÁFICO</button>
-            <button class="filter-btn" data-filter="publicidad">PUBLICIDAD EN REDES</button>
-            <button class="filter-btn" data-filter="grabado-laser">GRABADO LÁSER</button>
-            <button class="filter-btn" data-filter="equipos">EQUIPOS E INSUMOS</button>
-            <button class="filter-btn" data-filter="packs-digitales">PAQUETES DIGITALES</button>
+          <div class="filter-wrapper" role="group" aria-label="Filtros del catálogo">
+            <button class="filter-btn active" data-filter="all" aria-pressed="true">TODOS</button>
+            <button class="filter-btn" data-filter="diseno-grafico" aria-pressed="false">DISEÑO GRÁFICO</button>
+            <button class="filter-btn" data-filter="publicidad" aria-pressed="false">PUBLICIDAD EN REDES</button>
+            <button class="filter-btn" data-filter="grabado-laser" aria-pressed="false">GRABADO LÁSER</button>
+            <button class="filter-btn" data-filter="equipos" aria-pressed="false">EQUIPOS E INSUMOS</button>
+            <button class="filter-btn" data-filter="packs-digitales" aria-pressed="false">PAQUETES DIGITALES</button>
           </div>
         </div>
 
@@ -1232,8 +1238,10 @@
       filterButtons.forEach(btn => {
         if (btn.getAttribute('data-filter') === category) {
           btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
         } else {
           btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', 'false');
         }
       });
 
@@ -1355,6 +1363,7 @@
           link.addEventListener('click', () => {
             navMenu.classList.remove('is-active');
             hamburgerBtn.classList.remove('is-active');
+            hamburgerBtn.setAttribute('aria-expanded', 'false');
           });
       });
   </script>

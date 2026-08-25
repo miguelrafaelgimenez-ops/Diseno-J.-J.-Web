@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finalizar Compra | Diseño J. J.</title>
+  <title>Finalizar Compra Segura | Diseño J. J.</title>
   <meta name="description"
-    content="Completa tu pedido digital en Diseño J. J. — Transferencia o Giro en Guaraníes con envío de comprobante." />
+    content="Completa tu pedido digital en Diseño J. J. — Pago online seguro con entrega automática e inmediata a tu correo." />
   <link rel="icon" type="image/png" href="assets/logo.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -181,79 +181,49 @@
       color: var(--color-electric-blue);
       margin-top: 0.35rem;
       display: block;
+      line-height: 1.4;
     }
 
-    /* Método de Pago Tabs */
-    .payment-tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .payment-tab-btn {
-      padding: 0.85rem;
-      border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-align: center;
-      transition: all var(--transition);
-    }
-
-    .payment-tab-btn.active {
-      background: rgba(0, 210, 255, 0.12);
-      border-color: var(--color-electric-blue);
-      color: #fff;
-      box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
-    }
-
-    .payment-info-box {
-      background: #060c1d;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 1.15rem;
-      margin-bottom: 1.25rem;
-      font-size: 0.875rem;
-    }
-
-    .payment-info-row {
+    /* Opciones de Pago Seguro */
+    .gateway-badge-box {
       display: flex;
-      justify-content: space-between;
-      padding: 0.35rem 0;
-      border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
-    }
-
-    .payment-info-label {
-      color: var(--text-dim);
-    }
-
-    .payment-info-val {
-      color: var(--text-white);
-      font-weight: 700;
-    }
-
-    /* Dropzone para Comprobante */
-    .proof-dropzone {
-      border: 2px dashed var(--border-highlight);
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: rgba(0, 210, 255, 0.05);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
-      padding: 1.5rem;
-      text-align: center;
-      background: rgba(0, 210, 255, 0.03);
-      cursor: pointer;
-      transition: background var(--transition);
+      margin-bottom: 1.25rem;
     }
 
-    .proof-dropzone:hover {
-      background: rgba(0, 210, 255, 0.08);
+    .gateway-icons {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .gateway-pill {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .security-notice {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--color-green);
+      margin-top: 0.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .btn-submit-order {
       width: 100%;
-      padding: 0.95rem;
+      padding: 1rem;
       border-radius: var(--radius-full);
       background: linear-gradient(135deg, var(--color-electric-blue) 0%, var(--color-primary-blue) 100%);
       color: #040915;
@@ -264,6 +234,10 @@
       cursor: pointer;
       box-shadow: var(--glow-blue);
       transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
 
     .btn-submit-order:hover {
@@ -333,18 +307,16 @@
         <img src="assets/logo.png" alt="Diseño J. J." class="logo-img" />
         <span class="logo-name">DISEÑO J. J.</span>
       </a>
-      <a href="tienda.html" style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">← Volver a la
-        Tienda</a>
+      <a href="tienda.html" style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">← Volver a la Tienda</a>
     </div>
   </header>
 
   <main class="container">
     <h1 class="checkout-title">FINALIZAR COMPRA</h1>
-    <p class="checkout-subtitle">Completa tus datos y adjunta tu comprobante para liberar tu producto digital o curso.
-    </p>
+    <p class="checkout-subtitle">Pago 100% online y entrega automática inmediata a tu correo electrónico.</p>
 
-    <form id="checkoutForm" class="checkout-grid" enctype="multipart/form-data">
-      <!-- COLUMNA IZQUIERDA: FORMULARIO Y PAGO -->
+    <form id="checkoutForm" class="checkout-grid">
+      <!-- COLUMNA IZQUIERDA: DATOS Y PAGO ONLINE -->
       <div>
         <!-- DATOS DEL CLIENTE -->
         <div class="card-box">
@@ -353,111 +325,77 @@
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            1. Datos del Cliente
+            1. Datos del Comprador
           </h2>
 
           <div class="form-group">
-            <label class="form-label" for="customer_name">Nombre y Apellido *</label>
-            <input type="text" id="customer_name" name="customer_name" class="form-input" placeholder="Ej. Juan Pérez"
-              required />
+            <label class="form-label" for="customer_name">Nombre Completo *</label>
+            <input type="text" id="customer_name" name="customer_name" class="form-input" placeholder="Ej. Juan Pérez" required />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="customer_email">Correo Electrónico *</label>
-            <input type="email" id="customer_email" name="customer_email" class="form-input"
-              placeholder="ejemplo@correo.com" required />
-            <span class="form-notice">Este correo será utilizado para enviarte el producto después de confirmar tu
-              pago.</span>
+            <input type="email" id="customer_email" name="customer_email" class="form-input" placeholder="ejemplo@correo.com" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="customer_email_confirm">Confirmar Correo Electrónico *</label>
+            <input type="email" id="customer_email_confirm" name="customer_email_confirm" class="form-input" placeholder="Confirma tu correo" required />
+            <span class="form-notice">
+              ⚠️ <b>Importante:</b> Este correo será utilizado para enviarte el producto digital o acceso al curso inmediatamente después de confirmar el pago.
+            </span>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="customer_phone">Teléfono / WhatsApp *</label>
-            <input type="tel" id="customer_phone" name="customer_phone" class="form-input" placeholder="(0981) 123 456"
-              required />
+            <input type="tel" id="customer_phone" name="customer_phone" class="form-input" placeholder="(0981) 123 456" required />
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
               <label class="form-label" for="customer_country">País</label>
-              <input type="text" id="customer_country" name="customer_country" class="form-input" value="Paraguay"
-                readonly />
+              <input type="text" id="customer_country" name="customer_country" class="form-input" value="Paraguay" readonly />
             </div>
             <div class="form-group">
               <label class="form-label" for="customer_city">Ciudad (Opcional)</label>
-              <input type="text" id="customer_city" name="customer_city" class="form-input"
-                placeholder="Ej. Asunción" />
+              <input type="text" id="customer_city" name="customer_city" class="form-input" placeholder="Ej. Asunción" />
             </div>
           </div>
         </div>
 
-        <!-- MÉTODOS DE PAGO Y DATOS BANCARIOS -->
+        <!-- PASARELA DE PAGO ONLINE -->
         <div class="card-box">
           <h2 class="card-box-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
               <line x1="1" y1="10" x2="23" y2="10"></line>
             </svg>
-            2. Método de Pago (Paraguay)
+            2. Método de Pago Online
           </h2>
 
-          <div class="payment-tabs">
-            <button type="button" class="payment-tab-btn active" id="tabTransfer"
-              onclick="selectPaymentMethod('TRANSFER')">TRANSFERENCIA</button>
-            <button type="button" class="payment-tab-btn" id="tabGiro" onclick="selectPaymentMethod('GIRO')">GIRO
-              MÓVIL</button>
-          </div>
-          <input type="hidden" id="payment_method" name="payment_method" value="TRANSFER" />
-
-          <!-- INSTRUCCIONES DE TRANSFERENCIA -->
-          <div class="payment-info-box" id="boxTransferInfo">
-            <div class="payment-info-row"><span class="payment-info-label">Banco / Entidad:</span><span
-                class="payment-info-val">Visión Banco / Itaú</span></div>
-            <div class="payment-info-row"><span class="payment-info-label">Titular de Cuenta:</span><span
-                class="payment-info-val">Diseño J. J.</span></div>
-            <div class="payment-info-row"><span class="payment-info-label">Número de Cuenta:</span><span
-                class="payment-info-val">00000000000</span></div>
-            <div class="payment-info-row"><span class="payment-info-label">RUC / Documento:</span><span
-                class="payment-info-val">8000000-0</span></div>
-            <div class="payment-info-row"><span class="payment-info-label">Monto Exacto:</span><span
-                class="payment-info-val" id="paymentTransferAmount">₲ 0</span></div>
-            <p style="color: var(--color-electric-blue); margin-top: 0.75rem; font-size: 0.8rem; font-weight: 600;">
-              Realiza la transferencia por el monto exacto indicado y luego sube tu comprobante a continuación.
-            </p>
-          </div>
-
-          <!-- INSTRUCCIONES DE GIRO -->
-          <div class="payment-info-box" id="boxGiroInfo" style="display: none;">
-            <div class="payment-info-row"><span class="payment-info-label">Titular del Giro:</span><span
-                class="payment-info-val">Diseño J. J.</span></div>
-            <div class="payment-info-row"><span class="payment-info-label">Teléfono para Giro:</span><span
-                class="payment-info-val">(0983) 828 584 / (0984) 828 584</span></div>
-            <div class="payment-info-row"><span class="payment-info-label">Monto Exacto:</span><span
-                class="payment-info-val" id="paymentGiroAmount">₲ 0</span></div>
-            <p style="color: var(--color-electric-blue); margin-top: 0.75rem; font-size: 0.8rem; font-weight: 600;">
-              Realiza el giro por el monto exacto indicado y luego sube tu comprobante a continuación.
-            </p>
-          </div>
-
-          <!-- COMPROBANTE -->
-          <div class="form-group">
-            <label class="form-label">Subir Comprobante de Pago *</label>
-            <div class="proof-dropzone" onclick="document.getElementById('proof_file').click()">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-electric-blue)"
-                stroke-width="2" style="margin: 0 auto 0.5rem auto;">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-              <div id="proofFileName" style="font-weight: 700; color: #fff; font-size: 0.9rem;">Haz clic para
-                seleccionar tu comprobante (JPG, PNG, PDF)</div>
-              <span style="font-size: 0.78rem; color: var(--text-dim);">Tamaño máximo: 5 MB</span>
+          <div class="gateway-badge-box">
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.95rem; color: #fff; margin-bottom: 0.25rem;">Pasarela de Pago Segura (Paraguay & Internacional)</div>
+              <div class="gateway-icons">
+                <span class="gateway-pill">Tarjetas de Débito/Crédito</span>
+                <span class="gateway-pill">Bancard / Infonet</span>
+                <span class="gateway-pill">Pagopar</span>
+              </div>
             </div>
-            <input type="file" id="proof_file" name="proof_file" accept=".jpg,.jpeg,.png,.pdf" style="display: none;"
-              required onchange="handleFileSelected(this)" />
           </div>
-        </div>
 
-        <button type="submit" class="btn-submit-order" id="submitBtn">CONFIRMAR Y ENVIAR COMPROBANTE</button>
+          <div class="security-notice">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>Transacción 100% encriptada y procesada por la pasarela de pago oficial.</span>
+          </div>
+
+          <button type="submit" class="btn-submit-order" id="submitBtn">
+            <span>PROCEDER AL PAGO ONLINE SEGURO</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
       </div>
 
       <!-- COLUMNA DERECHA: RESUMEN DE COMPRA -->
@@ -479,39 +417,6 @@
   <script src="assets/js/cart.js"></script>
 
   <script>
-    let currentMethod = 'TRANSFER';
-
-    function selectPaymentMethod(method) {
-      currentMethod = method;
-      document.getElementById('payment_method').value = method;
-
-      const tabT = document.getElementById('tabTransfer');
-      const tabG = document.getElementById('tabGiro');
-      const boxT = document.getElementById('boxTransferInfo');
-      const boxG = document.getElementById('boxGiroInfo');
-
-      if (method === 'TRANSFER') {
-        tabT.classList.add('active');
-        tabG.classList.remove('active');
-        boxT.style.display = 'block';
-        boxG.style.display = 'none';
-      } else {
-        tabG.classList.add('active');
-        tabT.classList.remove('active');
-        boxG.style.display = 'block';
-        boxT.style.display = 'none';
-      }
-    }
-
-    function handleFileSelected(input) {
-      const display = document.getElementById('proofFileName');
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        display.textContent = `Archivo seleccionado: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-        display.style.color = 'var(--color-electric-blue)';
-      }
-    }
-
     function renderCheckoutSummary() {
       const { cart, totalGuarani } = getCartTotals();
       const container = document.getElementById('checkoutSummaryItems');
@@ -529,45 +434,59 @@
         </div>
       `).join('');
 
-      const formattedTotal = formatGuarani(totalGuarani);
-      document.getElementById('checkoutTotalVal').textContent = formattedTotal;
-      document.getElementById('paymentTransferAmount').textContent = formattedTotal;
-      document.getElementById('paymentGiroAmount').textContent = formattedTotal;
+      document.getElementById('checkoutTotalVal').textContent = formatGuarani(totalGuarani);
     }
 
-    // Manejar envío del formulario
+    // Manejar envío del formulario e inicio de pago
     document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const { cart } = getCartTotals();
       if (cart.length === 0) return;
 
+      const email = document.getElementById('customer_email').value.trim();
+      const emailConfirm = document.getElementById('customer_email_confirm').value.trim();
+
+      if (email.toLowerCase() !== emailConfirm.toLowerCase()) {
+        alert('Los correos electrónicos ingresados no coinciden. Por favor verifícalos.');
+        return;
+      }
+
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'PROCESANDO Y SUBIENDO COMPROBANTE...';
+      submitBtn.innerHTML = '<span>CONECTANDO CON LA PASARELA DE PAGO...</span>';
 
-      const formData = new FormData(e.target);
-      formData.append('cart_items', JSON.stringify(cart));
+      const payload = {
+        customer_name: document.getElementById('customer_name').value,
+        customer_email: email,
+        customer_email_confirm: emailConfirm,
+        customer_phone: document.getElementById('customer_phone').value,
+        customer_country: document.getElementById('customer_country').value,
+        customer_city: document.getElementById('customer_city').value,
+        cart_items: cart
+      };
 
       try {
-        const res = await fetch('/api/orders/checkout', {
+        const res = await fetch('/api/orders/create', {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
 
         const data = await res.json();
 
         if (res.ok && data.success) {
-          clearCart(); // Vaciar el carrito tras éxito
-          window.location.href = `confirmacion.html?code=${data.order.order_code}`;
+          clearCart(); // Vaciar carrito
+          // Redirigir a la URL de pago de la pasarela o a la confirmación segura
+          window.location.href = data.payment_url || `confirmacion.html?code=${data.order.order_code}`;
         } else {
-          alert(data.error || 'Ocurrió un error al enviar tu comprobante.');
+          alert(data.error || 'Ocurrió un error al procesar el pedido.');
           submitBtn.disabled = false;
-          submitBtn.textContent = 'CONFIRMAR Y ENVIAR COMPROBANTE';
+          submitBtn.innerHTML = '<span>PROCEDER AL PAGO ONLINE SEGURO</span>';
         }
       } catch (err) {
-        alert('Error de conexión con el servidor. Intente nuevamente.');
+        alert('Error de conexión con el servidor.');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'CONFIRMAR Y ENVIAR COMPROBANTE';
+        submitBtn.innerHTML = '<span>PROCEDER AL PAGO ONLINE SEGURO</span>';
       }
     });
 

@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // Crear directorio de base de datos si no existe
 const dbDir = path.join(__dirname);
@@ -7,7 +8,6 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-// Motor de persistencia JSON / SQLite híbrido (Garantiza 100% compatibilidad sin fallos de compilación)
 const jsonDbPath = path.join(dbDir, 'diseno_jj_data.json');
 
 const initialData = {
@@ -112,7 +112,6 @@ function saveDb(data) {
   fs.writeFileSync(jsonDbPath, JSON.stringify(data, null, 2), 'utf-8');
 }
 
-// Interfaz orientada a objetos para operaciones de Base de Datos
 const db = {
   getProducts: (onlyActive = true) => {
     const data = loadDb();
@@ -153,7 +152,7 @@ const db = {
     const data = loadDb();
     const newOrderId = data.orders.length > 0 ? Math.max(...data.orders.map(o => o.id)) + 1 : 1;
     
-    // Formato de código de pedido único: DJJ-2026-XXXXX
+    // Código único del pedido: DJJ-2026-XXXXX
     const seqStr = String(newOrderId).padStart(5, '0');
     const order_code = `DJJ-2026-${seqStr}`;
 
@@ -165,13 +164,14 @@ const db = {
       customer_phone: orderPayload.customer_phone,
       customer_country: orderPayload.customer_country || 'Paraguay',
       customer_city: orderPayload.customer_city || '',
-      payment_method: orderPayload.payment_method, // TRANSFER | GIRO
+      payment_gateway: orderPayload.payment_gateway || 'ONLINE_GATEWAY',
+      transaction_id: orderPayload.transaction_id || '',
       total_guarani: orderPayload.total_guarani,
-      status: 'PENDING', // PENDING | PAID | REJECTED | DELIVERED
-      proof_file_name: orderPayload.proof_file_name || '',
-      rejection_reason: '',
+      status: 'PENDING', // PENDING | PAID | FAILED | CANCELLED | DELIVERED
+      delivery_status: 'PENDING', // PENDING | DELIVERED | EMAIL_SENT | EMAIL_FAILED
       created_at: new Date().toISOString(),
-      approved_at: null
+      paid_at: null,
+      delivered_at: null
     };
 
     data.orders.push(newOrder);
@@ -196,7 +196,7 @@ const db = {
   getOrders: (filterStatus = null) => {
     const data = loadDb();
     let res = data.orders;
-    if (filterStatus) {
+    if (filterStatus && filterStatus !== 'ALL') {
       res = res.filter(o => o.status === filterStatus);
     }
     return res.map(order => ({
@@ -214,48 +214,63 @@ const db = {
     return { ...order, items, delivery };
   },
 
-  updateOrderStatus: (orderId, status, rejection_reason = '') => {
+  /**
+   * Marca una orden como pagada automáticamente por el Webhook (con Idempotencia Estricta)
+   */
+  markOrderAsPaid: (orderCodeOrId, transactionId = '') => {
     const data = loadDb();
-    const idx = data.orders.findIndex(o => o.id === Number(orderId));
-    if (idx === -1) return null;
+    const idx = data.orders.findIndex(o => o.order_code === orderCodeOrId || o.id === Number(orderCodeOrId));
+    if (idx === -1) return { error: 'Pedido no encontrado' };
 
-    data.orders[idx].status = status;
-    if (status === 'PAID' || status === 'DELIVERED') {
-      data.orders[idx].approved_at = new Date().toISOString();
+    const order = data.orders[idx];
+
+    // Protección de Idempotencia: Si ya está pagado o entregado, NO repetir entrega ni correo
+    if (order.status === 'PAID' || order.status === 'DELIVERED') {
+      const delivery = data.digital_deliveries.find(d => d.order_id === order.id);
+      const items = data.order_items.filter(i => i.order_id === order.id);
+      return {
+        alreadyProcessed: true,
+        order,
+        items,
+        delivery
+      };
     }
-    if (rejection_reason) {
-      data.orders[idx].rejection_reason = rejection_reason;
+
+    // Actualizar estado a PAID
+    data.orders[idx].status = 'PAID';
+    data.orders[idx].paid_at = new Date().toISOString();
+    if (transactionId) {
+      data.orders[idx].transaction_id = transactionId;
     }
+
+    // Crear token único no predecible para la entrega
+    let delivery = data.digital_deliveries.find(d => d.order_id === order.id);
+    if (!delivery) {
+      const token = 'djj_dl_' + crypto.randomBytes(16).toString('hex');
+      const deliveryId = data.digital_deliveries.length > 0 ? Math.max(...data.digital_deliveries.map(d => d.id)) + 1 : 1;
+      delivery = {
+        id: deliveryId,
+        order_id: order.id,
+        download_token: token,
+        download_count: 0,
+        delivery_status: 'ACTIVE',
+        created_at: new Date().toISOString()
+      };
+      data.digital_deliveries.push(delivery);
+    }
+
+    data.orders[idx].delivery_status = 'DELIVERED';
+    data.orders[idx].delivered_at = new Date().toISOString();
 
     saveDb(data);
-    return data.orders[idx];
-  },
 
-  createDeliveryToken: (orderId) => {
-    const data = loadDb();
-    const orderIdNum = Number(orderId);
-    let existing = data.digital_deliveries.find(d => d.order_id === orderIdNum);
-    
-    if (existing) {
-      return existing;
-    }
-
-    const crypto = require('crypto');
-    const token = 'djj_dl_' + crypto.randomBytes(16).toString('hex');
-    const deliveryId = data.digital_deliveries.length > 0 ? Math.max(...data.digital_deliveries.map(d => d.id)) + 1 : 1;
-    
-    const newDelivery = {
-      id: deliveryId,
-      order_id: orderIdNum,
-      download_token: token,
-      download_count: 0,
-      delivery_status: 'ACTIVE',
-      created_at: new Date().toISOString()
+    const items = data.order_items.filter(i => i.order_id === order.id);
+    return {
+      alreadyProcessed: false,
+      order: data.orders[idx],
+      items,
+      delivery
     };
-
-    data.digital_deliveries.push(newDelivery);
-    saveDb(data);
-    return newDelivery;
   },
 
   getDeliveryByToken: (token) => {
@@ -293,6 +308,33 @@ const db = {
   getUserByUsername: (username) => {
     const data = loadDb();
     return data.users.find(u => u.username === username);
+  },
+
+  getDashboardMetrics: () => {
+    const data = loadDb();
+    const allOrders = data.orders;
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    const currentMonthStr = now.toISOString().slice(0, 7);
+
+    const paidOrders = allOrders.filter(o => o.status === 'PAID' || o.status === 'DELIVERED');
+    const todayPaidOrders = paidOrders.filter(o => o.paid_at && o.paid_at.startsWith(todayStr));
+    const monthPaidOrders = paidOrders.filter(o => o.paid_at && o.paid_at.startsWith(currentMonthStr));
+
+    const totalIncome = paidOrders.reduce((acc, o) => acc + (o.total_guarani || 0), 0);
+    const todayIncome = todayPaidOrders.reduce((acc, o) => acc + (o.total_guarani || 0), 0);
+    const monthIncome = monthPaidOrders.reduce((acc, o) => acc + (o.total_guarani || 0), 0);
+
+    return {
+      total_orders: allOrders.length,
+      paid_orders_count: paidOrders.length,
+      pending_orders_count: allOrders.filter(o => o.status === 'PENDING').length,
+      total_income: totalIncome,
+      today_income: todayIncome,
+      month_income: monthIncome,
+      active_products_count: data.products.filter(p => p.status === 'ACTIVE').length,
+      total_downloads_count: data.digital_deliveries.reduce((acc, d) => acc + (d.download_count || 0), 0)
+    };
   }
 };
 

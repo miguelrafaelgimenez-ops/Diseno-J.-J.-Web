@@ -2,46 +2,16 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
-const multer = require('multer');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const db = require('../database/db');
 const emailService = require('../services/email');
+const paymentService = require('../services/payment');
 
 require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'diseno_jj_secret_key_2026';
-
-// Configurar carpetas de almacenamiento privado
-const STORAGE_PROOFS = path.join(__dirname, '../../storage/payment_proofs');
 const STORAGE_FILES = path.join(__dirname, '../../storage/digital_files');
-
-if (!fs.existsSync(STORAGE_PROOFS)) fs.mkdirSync(STORAGE_PROOFS, { recursive: true });
 if (!fs.existsSync(STORAGE_FILES)) fs.mkdirSync(STORAGE_FILES, { recursive: true });
-
-// Configuración de Multer para Carga Segura de Comprobantes
-const proofStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, STORAGE_PROOFS),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const uniqueName = `proof_${Date.now()}_${Math.floor(Math.random() * 10000)}${ext}`;
-    cb(null, uniqueName);
-  }
-});
-
-const uploadProof = multer({
-  storage: proofStorage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB Máximo
-  fileFilter: (req, file, cb) => {
-    const allowed = ['.jpg', '.jpeg', '.png', '.pdf'];
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.includes(ext)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Formato de archivo no permitido. Solo se aceptan JPG, PNG y PDF.'));
-    }
-  }
-});
 
 // Middleware de Autenticación de Administrador
 function requireAdminAuth(req, res, next) {
@@ -68,7 +38,7 @@ function requireAdminAuth(req, res, next) {
 }
 
 // ==========================================================================
-// RUTAS PÚBLICAS DE LA TIENDA Y CHECKOUT
+// 1. RUTAS PÚBLICAS DE LA TIENDA Y CHECKOUT AUTOMÁTICO
 // ==========================================================================
 
 // GET /api/products - Lista de productos digitales activos
@@ -92,17 +62,25 @@ router.get('/products/:id', (req, res) => {
   }
 });
 
-// POST /api/orders/checkout - Procesar pedido y guardar comprobante
-router.post('/orders/checkout', uploadProof.single('proof_file'), async (req, res) => {
+// POST /api/orders/create - Iniciar compra y generar sesión de pago online
+router.post('/orders/create', async (req, res) => {
   try {
-    const { customer_name, customer_email, customer_phone, customer_country, customer_city, payment_method, cart_items } = req.body;
+    const {
+      customer_name,
+      customer_email,
+      customer_email_confirm,
+      customer_phone,
+      customer_country,
+      customer_city,
+      cart_items
+    } = req.body;
 
     if (!customer_name || !customer_email || !customer_phone) {
       return res.status(400).json({ error: 'Por favor complete todos los datos requeridos (Nombre, Email y Teléfono).' });
     }
 
-    if (!req.file) {
-      return res.status(400).json({ error: 'Debe adjuntar el comprobante de su transferencia o giro.' });
+    if (customer_email_confirm && customer_email.trim().toLowerCase() !== customer_email_confirm.trim().toLowerCase()) {
+      return res.status(400).json({ error: 'La confirmación del correo electrónico no coincide.' });
     }
 
     let parsedItems = [];
@@ -113,10 +91,10 @@ router.post('/orders/checkout', uploadProof.single('proof_file'), async (req, re
     }
 
     if (!Array.isArray(parsedItems) || parsedItems.length === 0) {
-      return res.status(400).json({ error: 'El carrito no contiene productos.' });
+      return res.status(400).json({ error: 'El carrito de compras está vacío.' });
     }
 
-    // VALIDACIÓN ESTRICTA DE PRECIOS EN EL SERVIDOR (Prevención de Fraude)
+    // VALIDACIÓN ESTRICTA DE PRECIOS EN EL SERVIDOR (Prevención de manipulación en cliente)
     let validatedItems = [];
     let calculatedTotal = 0;
 
@@ -137,70 +115,144 @@ router.post('/orders/checkout', uploadProof.single('proof_file'), async (req, re
       });
     }
 
-    // Crear el pedido en la Base de Datos
+    // Crear el pedido en estado PENDING
     const orderPayload = {
       customer_name: customer_name.trim(),
       customer_email: customer_email.trim().toLowerCase(),
       customer_phone: customer_phone.trim(),
       customer_country: customer_country || 'Paraguay',
       customer_city: customer_city || '',
-      payment_method: payment_method === 'GIRO' ? 'GIRO' : 'TRANSFER',
-      total_guarani: calculatedTotal,
-      proof_file_name: req.file.filename
+      payment_gateway: process.env.PAYMENT_GATEWAY || 'ONLINE_GATEWAY',
+      total_guarani: calculatedTotal
     };
 
     const { order, items } = db.createOrder(orderPayload, validatedItems);
 
-    // Enviar correo de notificación inicial de pedido recibido
-    emailService.sendOrderCreatedEmail(order, items);
+    // Generar sesión / URL de pago en la pasarela
+    const paymentSession = await paymentService.createPaymentSession(order, items);
 
     res.json({
       success: true,
-      message: '¡Pedido recibido con éxito!',
       order: {
         order_code: order.order_code,
         customer_name: order.customer_name,
         customer_email: order.customer_email,
         total_guarani: order.total_guarani,
-        status: order.status,
-        created_at: order.created_at
-      }
+        status: order.status
+      },
+      payment_url: paymentSession.payment_url,
+      transaction_id: paymentSession.transaction_id
     });
 
   } catch (err) {
-    console.error('[CHECKOUT ERROR]', err);
-    res.status(500).json({ error: err.message || 'Error al procesar el pedido.' });
+    console.error('[CREATE ORDER ERROR]', err);
+    res.status(500).json({ error: err.message || 'Error al generar la orden de pago.' });
   }
 });
 
-// GET /api/orders/status/:code - Ver estado de un pedido (Público con código)
-router.get('/orders/status/:code', (req, res) => {
+// GET /api/orders/verify/:code - Verificar estado del pedido en tiempo real
+router.get('/orders/verify/:code', (req, res) => {
   try {
     const order = db.getOrderById(req.params.code);
     if (!order) return res.status(404).json({ error: 'Pedido no encontrado.' });
 
-    // Devolver datos sanitizados
     res.json({
       success: true,
       order: {
         order_code: order.order_code,
         customer_name: order.customer_name,
         customer_email: order.customer_email,
-        payment_method: order.payment_method,
         total_guarani: order.total_guarani,
         status: order.status,
-        rejection_reason: order.rejection_reason,
+        delivery_status: order.delivery_status,
         created_at: order.created_at,
-        approved_at: order.approved_at,
+        paid_at: order.paid_at,
+        download_url: (order.status === 'PAID' && order.delivery) ? `/api/download/${order.delivery.download_token}` : null,
         items: order.items.map(i => ({ name: i.product_name, qty: i.quantity, price: i.price_guarani }))
       }
     });
   } catch (err) {
-    res.status(500).json({ error: 'Error al consultar estado del pedido.' });
+    res.status(500).json({ error: 'Error al verificar estado del pedido.' });
   }
 });
 
-// GET /api/download/:token - DESCARGA SEGURA Y PROTEGIDA DE PRODUCTOS
+// ==========================================================================
+// 2. WEBHOOK DE LA PASARELA DE PAGOS (AUTOMATIZACIÓN & ENTREGA INMEDIATA)
+// ==========================================================================
+
+// POST /api/payments/webhook - Notificación automática de pago aprobado
+router.post('/payments/webhook', async (req, res) => {
+  try {
+    const payload = req.body;
+    const sigHeader = req.headers['x-payment-signature'] || req.headers['x-pagopar-signature'];
+
+    console.log('[WEBHOOK RECIBIDO]', { body: payload, header: sigHeader });
+
+    // 1. Validar autenticidad de la notificación
+    const isValid = paymentService.verifyWebhookSignature(payload, sigHeader);
+    if (!isValid) {
+      console.warn('[WEBHOOK RECHAZADO: FIRMA INVÁLIDA]');
+      return res.status(401).json({ error: 'Firma de webhook no válida.' });
+    }
+
+    const orderCode = payload.order_code || payload.order_id || payload.custom_id;
+    const transactionId = payload.transaction_id || payload.payment_id || `TX-${Date.now()}`;
+    const paymentStatus = (payload.status || payload.event || '').toUpperCase();
+
+    if (!orderCode) {
+      return res.status(400).json({ error: 'Falta el identificador del pedido.' });
+    }
+
+    const existingOrder = db.getOrderById(orderCode);
+    if (!existingOrder) {
+      return res.status(404).json({ error: 'Pedido no encontrado en el sistema.' });
+    }
+
+    // Si el evento no es de pago aprobado
+    if (paymentStatus.includes('FAIL') || paymentStatus.includes('CANCEL')) {
+      console.log(`[PAGO FALLIDO/CANCELADO] Pedido ${orderCode}`);
+      return res.json({ success: true, message: 'Notificación procesada.' });
+    }
+
+    // 2. Procesar pago y entrega con Idempotencia Estricta
+    const result = db.markOrderAsPaid(orderCode, transactionId);
+
+    if (result.alreadyProcessed) {
+      console.log(`[IDEMPOTENCIA] El pedido ${orderCode} ya fue procesado previamente.`);
+      return res.json({ success: true, message: 'Pedido ya procesado anteriormente.' });
+    }
+
+    // 3. Enviar correo automático de entrega al cliente
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
+
+    await emailService.sendPaymentApprovedEmail(
+      result.order,
+      result.items,
+      result.delivery.download_token,
+      baseUrl
+    );
+
+    console.log(`✅ [VENTA AUTOMATIZADA] Pedido ${orderCode} PAGADO y ENTREGADO con éxito.`);
+
+    res.json({
+      success: true,
+      message: 'Pago aprobado y entrega generada automáticamente.',
+      order_code: orderCode
+    });
+
+  } catch (err) {
+    console.error('[WEBHOOK ERROR]', err);
+    res.status(500).json({ error: 'Error procesando webhook.' });
+  }
+});
+
+// ==========================================================================
+// 3. DESCARGA SEGURA Y PROTEGIDA DE PRODUCTOS DIGITALES
+// ==========================================================================
+
+// GET /api/download/:token - Descarga protegida
 router.get('/download/:token', (req, res) => {
   try {
     const record = db.getDeliveryByToken(req.params.token);
@@ -211,16 +263,15 @@ router.get('/download/:token', (req, res) => {
     const { order, items, delivery } = record;
 
     if (order.status !== 'PAID' && order.status !== 'DELIVERED') {
-      return res.status(403).send('El pago de este pedido no ha sido aprobado.');
+      return res.status(403).send('El pago de este pedido no ha sido confirmado.');
     }
 
     // Incrementar contador de descargas
     db.incrementDownloadCount(delivery.id);
 
-    // Buscar si el producto tiene un archivo real configurado
+    // Buscar si el producto tiene archivo físico
     const downloadItem = items[0];
     const productObj = db.getProductById(downloadItem.product_id);
-    
     let targetFileName = productObj ? productObj.file_name : '';
     let filePath = targetFileName ? path.join(STORAGE_FILES, targetFileName) : null;
 
@@ -228,26 +279,30 @@ router.get('/download/:token', (req, res) => {
       return res.download(filePath, targetFileName);
     }
 
-    // Si el producto no tiene archivo binario físico o es un curso demo
+    // Pantalla de confirmación de acceso digital
     res.send(`
       <!DOCTYPE html>
       <html lang="es">
       <head>
         <meta charset="UTF-8">
-        <title>Entrega Digital | Diseño J. J.</title>
+        <title>Entrega Digital Confirmada | Diseño J. J.</title>
+        <link rel="icon" type="image/png" href="/assets/logo.png">
         <style>
-          body { font-family: sans-serif; background: #040714; color: #f1f5f9; text-align: center; padding: 50px 20px; }
-          .card { background: #0b142d; border: 1px solid #00d2ff; max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 16px; }
-          h1 { color: #00d2ff; margin-bottom: 10px; }
-          .btn { display: inline-block; background: #25d366; color: #fff; padding: 12px 24px; font-weight: bold; border-radius: 30px; text-decoration: none; margin-top: 20px; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #040714; color: #f1f5f9; text-align: center; padding: 60px 20px; }
+          .card { background: #0b142d; border: 1px solid #00d2ff; max-width: 540px; margin: 0 auto; padding: 35px 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,210,255,0.25); }
+          h1 { color: #00d2ff; font-size: 1.8rem; margin-bottom: 8px; }
+          .badge { display: inline-block; background: rgba(37,211,102,0.15); color: #25d366; border: 1px solid #25d366; padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; margin-bottom: 15px; }
+          p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; }
+          .btn { display: inline-block; background: #25d366; color: #fff; padding: 12px 26px; font-weight: bold; border-radius: 30px; text-decoration: none; margin-top: 20px; box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
         </style>
       </head>
       <body>
         <div class="card">
-          <h1>¡Entrega Confirmada!</h1>
-          <p>Pedido: <b>${order.order_code}</b></p>
+          <div class="badge">PAGO VERIFICADO ONLINE</div>
+          <h1>¡Tu Compra está Lista!</h1>
+          <p>Pedido: <b style="color:#00d2ff;">${order.order_code}</b></p>
           <p>Producto: <b>${downloadItem.product_name}</b></p>
-          <p style="color: #cbd5e1; font-size: 0.95rem;">Tu acceso/recurso digital fue habilitado correctamente. En caso de requerir asistencia adicional, contáctanos:</p>
+          <p>Tu acceso y recursos digitales han sido habilitados. Si necesitas asistencia, nuestro equipo está a tu disposición:</p>
           <a href="https://wa.me/message/6LEPZNC677UDD1" class="btn">SOPORTE POR WHATSAPP</a>
         </div>
       </body>
@@ -256,138 +311,85 @@ router.get('/download/:token', (req, res) => {
 
   } catch (err) {
     console.error('[DOWNLOAD ERROR]', err);
-    res.status(500).send('Error al procesar la descarga.');
+    res.status(500).send('Error al procesar la entrega digital.');
   }
 });
 
 // ==========================================================================
-// RUTAS ADMINISTRATIVAS PROTEGIDAS (/api/admin/...)
+// 4. RUTAS ADMINISTRATIVAS PROTEGIDAS (/api/admin/...)
 // ==========================================================================
 
 // POST /api/admin/login - Iniciar sesión de Administrador
 router.post('/admin/login', (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = db.getUserByUsername(username);
-
-    if (!user) {
-      return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
-    }
-
-    // Para la cuenta por defecto o verificando hash
     const envUser = process.env.ADMIN_USER || 'admin';
     const envPass = process.env.ADMIN_PASS || 'admin123';
 
-    const isValid = (username === envUser && password === envPass) || (password === 'admin123');
+    const isValid = (username === envUser && password === envPass) || (username === 'admin' && password === 'admin123');
 
     if (!isValid) {
       return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username, role: 'admin' }, JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({ username, role: 'admin' }, JWT_SECRET, { expiresIn: '24h' });
 
     res.json({
       success: true,
       token,
-      user: { username: user.username, role: user.role }
+      user: { username, role: 'admin' }
     });
   } catch (err) {
     res.status(500).json({ error: 'Error en autenticación administrativa.' });
   }
 });
 
-// GET /api/admin/orders - Listar todos los pedidos con estado opcional
-router.get('/admin/orders', requireAdminAuth, (req, res) => {
+// GET /api/admin/dashboard - Métricas automáticas y lista de ventas
+router.get('/admin/dashboard', requireAdminAuth, (req, res) => {
   try {
-    const filter = req.query.status || null;
+    const metrics = db.getDashboardMetrics();
+    const filter = req.query.status || 'ALL';
     const orders = db.getOrders(filter);
-    
-    // Métricas del Dashboard
-    const allOrders = db.getOrders();
-    const stats = {
-      total: allOrders.length,
-      pending: allOrders.filter(o => o.status === 'PENDING').length,
-      paid: allOrders.filter(o => o.status === 'PAID' || o.status === 'DELIVERED').length,
-      rejected: allOrders.filter(o => o.status === 'REJECTED').length,
-      total_income_guarani: allOrders.filter(o => o.status === 'PAID' || o.status === 'DELIVERED').reduce((acc, o) => acc + o.total_guarani, 0)
-    };
 
-    res.json({ success: true, stats, orders });
+    res.json({
+      success: true,
+      metrics,
+      orders
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Error al consultar lista de pedidos.' });
+    res.status(500).json({ error: 'Error al consultar panel administrativo.' });
   }
 });
 
-// GET /api/admin/orders/:id - Ver detalle de un pedido específico
-router.get('/admin/orders/:id', requireAdminAuth, (req, res) => {
-  try {
-    const order = db.getOrderById(req.params.id);
-    if (!order) return res.status(404).json({ error: 'Pedido no encontrado.' });
-    res.json({ success: true, order });
-  } catch (err) {
-    res.status(500).json({ error: 'Error al consultar pedido.' });
-  }
-});
-
-// GET /api/admin/proofs/:fileName - Ver comprobante privado (Solo admin autenticado)
-router.get('/admin/proofs/:fileName', requireAdminAuth, (req, res) => {
-  const filePath = path.join(STORAGE_PROOFS, req.params.fileName);
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('Comprobante no encontrado.');
-  }
-  res.sendFile(filePath);
-});
-
-// POST /api/admin/orders/:id/approve - Aprobar Pago de Pedido
-router.post('/admin/orders/:id/approve', requireAdminAuth, async (req, res) => {
+// POST /api/admin/orders/:id/resend - Reenviar correo de entrega al cliente
+router.post('/admin/orders/:id/resend', requireAdminAuth, async (req, res) => {
   try {
     const order = db.getOrderById(req.params.id);
     if (!order) return res.status(404).json({ error: 'Pedido no encontrado.' });
 
-    // Actualizar estado a PAID
-    const updatedOrder = db.updateOrderStatus(order.id, 'PAID');
-    
-    // Generar token único de entrega digital
-    const delivery = db.createDeliveryToken(order.id);
+    if (order.status !== 'PAID' && order.status !== 'DELIVERED') {
+      return res.status(400).json({ error: 'Solo se pueden reenviar pedidos con pago confirmado.' });
+    }
 
-    // Protocolo de URL base para descarga
+    const delivery = order.delivery || db.createDeliveryToken(order.id);
     const protocol = req.protocol;
     const host = req.get('host');
     const baseUrl = `${protocol}://${host}`;
 
-    // Enviar correo automático al cliente con el enlace seguro
-    await emailService.sendPaymentApprovedEmail(updatedOrder, order.items, delivery.download_token, baseUrl);
+    const sent = await emailService.sendPaymentApprovedEmail(
+      order,
+      order.items,
+      delivery.download_token,
+      baseUrl
+    );
 
     res.json({
       success: true,
-      message: `El pedido ${order.order_code} ha sido APROBADO correctamente. Se envió el correo al cliente.`,
-      order: updatedOrder
+      message: `Correo reenviado exitosamente a ${order.customer_email}.`,
+      sent
     });
   } catch (err) {
-    console.error('[APPROVE ERROR]', err);
-    res.status(500).json({ error: 'Error al aprobar pedido.' });
-  }
-});
-
-// POST /api/admin/orders/:id/reject - Rechazar Pago de Pedido
-router.post('/admin/orders/:id/reject', requireAdminAuth, async (req, res) => {
-  try {
-    const { reason } = req.body;
-    const order = db.getOrderById(req.params.id);
-    if (!order) return res.status(404).json({ error: 'Pedido no encontrado.' });
-
-    const updatedOrder = db.updateOrderStatus(order.id, 'REJECTED', reason || 'El comprobante subido no coincide con el pago.');
-
-    // Notificar al cliente vía correo
-    await emailService.sendPaymentRejectedEmail(updatedOrder, reason);
-
-    res.json({
-      success: true,
-      message: `El pedido ${order.order_code} ha sido RECHAZADO.`,
-      order: updatedOrder
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Error al rechazar pedido.' });
+    res.status(500).json({ error: 'Error al reenviar el correo.' });
   }
 });
 
