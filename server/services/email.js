@@ -29,6 +29,19 @@ function formatGuarani(amount) {
   return '₲ ' + Number(amount).toLocaleString('es-PY');
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+}
+
+function brandedEmail(title, body) {
+  return `<div style="font-family:Arial,sans-serif;background:#040714;color:#f1f5f9;padding:24px;max-width:620px;margin:auto">
+    <div style="background:#0b142d;border:1px solid rgba(0,210,255,.35);border-radius:14px;padding:24px">
+      <h1 style="color:#00d2ff;font-size:24px;margin:0 0 18px">${escapeHtml(title)}</h1>${body}
+      <hr style="border:0;border-top:1px solid rgba(0,210,255,.25);margin:24px 0" />
+      <p style="color:#94a3b8;text-align:center;margin:0">Diseño J. J. — <i>Somos tu aliado creativo</i></p>
+    </div></div>`;
+}
+
 // 1. CORREO: PEDIDO RECIBIDO (PAGO PENDIENTE)
 async function sendOrderCreatedEmail(order, items) {
   const subject = `Pedido Recibido (${order.order_code}) — Diseño J. J.`;
@@ -119,8 +132,23 @@ async function sendPaymentRejectedEmail(order, reason) {
   return await deliverEmail(order.id, order.customer_email, subject, html);
 }
 
+async function sendDeliveryReadyEmail(order, product, downloadUrl) {
+  const html = brandedEmail('Tu producto digital está disponible', `<p>Hola, ${escapeHtml(order.customer_name)}.</p>
+    <p>Tu pedido <b>${escapeHtml(order.order_code)}</b> está listo para descargar.</p>
+    <p><b>Producto:</b> ${escapeHtml(product.name || product.product_name)}</p>
+    <p style="text-align:center"><a href="${escapeHtml(downloadUrl)}" style="display:inline-block;background:#00d2ff;color:#040714;padding:12px 22px;border-radius:24px;text-decoration:none;font-weight:bold">DESCARGAR PRODUCTO</a></p>`);
+  return deliverEmail(order.id, order.customer_email, `Tu compra en Diseño J. J. está lista`, html, 'DELIVERY_READY');
+}
+
+async function sendCourseAccessEmail(order, course, accessUrl) {
+  const html = brandedEmail('Tu curso ya está disponible', `<p>Hola, ${escapeHtml(order.customer_name)}.</p>
+    <p>Tu acceso al curso <b>${escapeHtml(course.title)}</b> fue preparado para el pedido ${escapeHtml(order.order_code)}.</p>
+    <p style="text-align:center"><a href="${escapeHtml(accessUrl)}" style="display:inline-block;background:#00d2ff;color:#040714;padding:12px 22px;border-radius:24px;text-decoration:none;font-weight:bold">ACCEDER AL CURSO</a></p>`);
+  return deliverEmail(order.id, order.customer_email, `Tu curso en Diseño J. J. está disponible`, html, 'COURSE_ACCESS');
+}
+
 // FUNCIÓN AUXILIAR DE ENVÍO
-async function deliverEmail(orderId, to, subject, html) {
+async function deliverEmail(orderId, to, subject, html, emailType = 'UNKNOWN') {
   const transporter = createTransporter();
   
   if (!transporter) {
@@ -128,6 +156,7 @@ async function deliverEmail(orderId, to, subject, html) {
     db.logEmail({
       order_id: orderId,
       email_to: to,
+      email_type: emailType,
       subject,
       status: 'EMAIL_FAILED',
       error_message: 'Servidor SMTP no configurado en .env'
@@ -146,6 +175,7 @@ async function deliverEmail(orderId, to, subject, html) {
     db.logEmail({
       order_id: orderId,
       email_to: to,
+      email_type: emailType,
       subject,
       status: 'EMAIL_SENT',
       error_message: ''
@@ -157,6 +187,7 @@ async function deliverEmail(orderId, to, subject, html) {
     db.logEmail({
       order_id: orderId,
       email_to: to,
+      email_type: emailType,
       subject,
       status: 'EMAIL_FAILED',
       error_message: error.message
@@ -168,5 +199,7 @@ async function deliverEmail(orderId, to, subject, html) {
 module.exports = {
   sendOrderCreatedEmail,
   sendPaymentApprovedEmail,
-  sendPaymentRejectedEmail
+  sendPaymentRejectedEmail,
+  sendDeliveryReadyEmail,
+  sendCourseAccessEmail
 };

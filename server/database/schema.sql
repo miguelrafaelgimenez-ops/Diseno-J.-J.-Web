@@ -33,6 +33,9 @@ CREATE TABLE IF NOT EXISTS products (
   type TEXT NOT NULL CHECK (type IN ('DOWNLOAD', 'COURSE')),
   image_url TEXT NOT NULL DEFAULT '',
   file_key TEXT,
+  file_name TEXT NOT NULL DEFAULT '',
+  mime_type TEXT NOT NULL DEFAULT '',
+  file_size BIGINT NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'ACTIVE',
   download_limit INTEGER,
   download_expiry_hours INTEGER,
@@ -153,3 +156,9 @@ CREATE TABLE IF NOT EXISTS webhook_events (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (provider, external_event_id)
 );
+
+CREATE INDEX IF NOT EXISTS orders_customer_idx ON orders(customer_id);
+CREATE INDEX IF NOT EXISTS order_items_product_idx ON order_items(product_id);
+CREATE INDEX IF NOT EXISTS deliveries_product_idx ON digital_deliveries(product_id);
+CREATE INDEX IF NOT EXISTS course_lessons_course_idx ON course_lessons(course_id);
+CREATE INDEX IF NOT EXISTS course_access_customer_idx ON course_access(customer_id);

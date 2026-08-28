@@ -122,6 +122,17 @@ npm start
 - Pruebas preparadas: `tests/payment-boundary.test.js`.
 - Las pruebas no se han ejecutado porque Node.js/npm no están disponibles en el entorno actual.
 
+## 📦 Entregas, almacenamiento, email y cursos
+
+- `server/services/delivery.js` prepara entregas idempotentes únicamente para pedidos `PAID` o `DELIVERED`.
+- Los tokens se generan aleatoriamente y solo se almacena su hash.
+- `storage/digital_files/` queda bloqueado para acceso estático directo; la descarga pasa por la API protegida.
+- La subida administrativa está disponible como `POST /api/admin/products/:id/file`, requiere JWT y acepta únicamente ZIP/PDF con límites de tamaño.
+- `server/services/storage.js` mantiene la abstracción para migrar posteriormente a un storage privado externo.
+- Se preparan correos `DELIVERY_READY` y `COURSE_ACCESS`; SMTP real sigue pendiente.
+- Los cursos tienen tablas, asociación producto-curso y accesos idempotentes; el área de alumno todavía no está implementada.
+- El webhook y la pasarela continúan bloqueados hasta una integración oficial.
+
 ---
 
 © 2026 **Diseño J. J.** — *Somos tu aliado creativo.*

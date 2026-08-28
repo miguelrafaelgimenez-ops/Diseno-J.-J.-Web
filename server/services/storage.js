@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 class StorageProvider {
   async upload() { throw new Error('StorageProvider.upload aún no está configurado.'); }
@@ -26,7 +27,13 @@ class PrivateLocalStorageProvider extends StorageProvider {
   }
 
   async download(key) { return this.resolveKey(key); }
-  async upload() { throw new Error('La carga de archivos requiere un proveedor privado configurado.'); }
+  async upload(file) {
+    if (!file || !Buffer.isBuffer(file.buffer)) throw new Error('Archivo inválido.');
+    const storageKey = `${crypto.randomUUID()}${path.extname(file.originalname).toLowerCase()}`;
+    const target = this.resolveKey(storageKey);
+    await fs.promises.writeFile(target, file.buffer, { flag: 'wx' });
+    return { storage_key: storageKey, filename: path.basename(file.originalname), mime_type: file.mimetype, size: file.size };
+  }
   async delete(key) { return fs.promises.unlink(this.resolveKey(key)); }
   async createTemporaryUrl() { throw new Error('URLs temporales requieren un proveedor privado configurado.'); }
 }

@@ -13,3 +13,9 @@ test('la pasarela permanece bloqueada sin adaptador oficial', async () => {
 test('un webhook sin adaptador no se considera auténtico', () => {
   assert.equal(payment.verifyWebhookSignature({ status: 'APPROVED' }, 'fake'), false);
 });
+
+test('los servicios de entrega dependen de un pedido pagado', () => {
+  const db = require('../server/database/sqlite');
+  const result = db.createDigitalDeliveries('missing-order');
+  assert.equal(result.error, 'ORDER_NOT_PAID');
+});

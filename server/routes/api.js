@@ -2,17 +2,31 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../database/sqlite');
 const emailService = require('../services/email');
 const paymentService = require('../services/payment');
 const { validateCustomerInput, validateQuantity } = require('../validation/order');
+const { PrivateLocalStorageProvider } = require('../services/storage');
+const deliveryService = require('../services/delivery');
 
 require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const STORAGE_FILES = path.join(__dirname, '../../storage/digital_files');
+const privateStorage = new PrivateLocalStorageProvider(STORAGE_FILES);
+const uploadDigitalFile = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = new Set(['application/zip', 'application/pdf', 'application/octet-stream']);
+    const extension = path.extname(file.originalname).toLowerCase();
+    if (!['.zip', '.pdf'].includes(extension) || !allowed.has(file.mimetype)) return cb(new Error('Solo se permiten archivos ZIP o PDF válidos.'));
+    cb(null, true);
+  }
+});
 const loginAttempts = new Map();
 if (!fs.existsSync(STORAGE_FILES)) fs.mkdirSync(STORAGE_FILES, { recursive: true });
 
@@ -401,6 +415,22 @@ router.get('/admin/dashboard', requireAdminAuth, (req, res) => {
   }
 });
 
+router.get('/admin/customers', requireAdminAuth, (req, res) => {
+  res.json({ success: true, customers: db.getCustomers ? db.getCustomers() : [] });
+});
+
+router.get('/admin/deliveries', requireAdminAuth, (req, res) => {
+  res.json({ success: true, deliveries: db.getDeliveries ? db.getDeliveries() : [] });
+});
+
+router.get('/admin/emails', requireAdminAuth, (req, res) => {
+  res.json({ success: true, emails: db.getEmailLogs ? db.getEmailLogs() : [] });
+});
+
+router.get('/admin/courses', requireAdminAuth, (req, res) => {
+  res.json({ success: true, courses: db.getCourses ? db.getCourses() : [] });
+});
+
 // POST /api/admin/orders/:id/resend - Reenviar correo de entrega al cliente
 router.post('/admin/orders/:id/resend', requireAdminAuth, async (req, res) => {
   try {
@@ -411,7 +441,15 @@ router.post('/admin/orders/:id/resend', requireAdminAuth, async (req, res) => {
       return res.status(400).json({ error: 'Solo se pueden reenviar pedidos con pago confirmado.' });
     }
 
-    const delivery = order.delivery || db.createDeliveryToken(order.id);
+    const deliveryResult = deliveryService.createDigitalDelivery(order.id);
+    const generated = deliveryResult.created?.find(entry => entry.token && entry.delivery);
+    const delivery = generated?.delivery || order.delivery;
+    // Los tokens se almacenan únicamente como hash. No es seguro reconstruir
+    // el enlace de una entrega existente; por eso solo se reenvía el token
+    // recién generado en esta operación.
+    if (!generated?.token) {
+      return res.status(409).json({ error: 'La entrega ya existe y su token no puede recuperarse. Genere una nueva entrega mediante el flujo autorizado.' });
+    }
     const protocol = req.protocol;
     const host = req.get('host');
     const baseUrl = `${protocol}://${host}`;
@@ -419,7 +457,7 @@ router.post('/admin/orders/:id/resend', requireAdminAuth, async (req, res) => {
     const sent = await emailService.sendPaymentApprovedEmail(
       order,
       order.items,
-      delivery.download_token,
+      generated.token,
       baseUrl
     );
 
@@ -460,6 +498,21 @@ router.post('/admin/products', requireAdminAuth, (req, res) => {
     res.json({ success: true, message: 'Producto guardado exitosamente.', product: saved });
   } catch (err) {
     res.status(500).json({ error: 'Error al guardar producto.' });
+  }
+});
+
+// POST /api/admin/products/:id/file - Carga privada de un archivo descargable
+router.post('/admin/products/:id/file', requireAdminAuth, uploadDigitalFile.single('digital_file'), async (req, res) => {
+  try {
+    const product = db.getProductById(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Producto no encontrado.' });
+    if (product.type !== 'DOWNLOAD') return res.status(400).json({ error: 'Solo los productos descargables pueden asociar un archivo.' });
+    if (!req.file) return res.status(400).json({ error: 'Debe seleccionar un archivo ZIP o PDF.' });
+    const stored = await privateStorage.upload(req.file);
+    const saved = db.setProductFile(product.id, stored);
+    res.json({ success: true, product: saved, storage_key: stored.storage_key });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'No se pudo guardar el archivo.' });
   }
 });
 

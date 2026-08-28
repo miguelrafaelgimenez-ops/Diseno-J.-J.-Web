@@ -49,6 +49,9 @@ CREATE TABLE IF NOT EXISTS products (
   type TEXT NOT NULL CHECK (type IN ('DOWNLOAD', 'COURSE')),
   image_url TEXT NOT NULL DEFAULT '',
   file_key TEXT NOT NULL DEFAULT '',
+  file_name TEXT NOT NULL DEFAULT '',
+  mime_type TEXT NOT NULL DEFAULT '',
+  file_size INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'ACTIVE',
   download_limit INTEGER,
   download_expiry_hours INTEGER,
@@ -106,6 +109,7 @@ CREATE TABLE IF NOT EXISTS digital_deliveries (
   last_download_at TEXT,
   created_at TEXT NOT NULL
 );
+CREATE UNIQUE INDEX IF NOT EXISTS digital_delivery_order_product_unique ON digital_deliveries(order_id, product_id);
 CREATE TABLE IF NOT EXISTS courses (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   product_id INTEGER NOT NULL UNIQUE REFERENCES products(id),
@@ -170,7 +174,8 @@ function publicProduct(row) {
   return {
     id: row.id, name: row.name, slug: row.slug, short_desc: row.short_description,
     description: row.description, price_guarani: row.price_minor, currency: row.currency,
-    type: row.type, image_url: row.image_url, file_name: row.file_key, status: row.status,
+    type: row.type, image_url: row.image_url, file_name: row.file_name || row.file_key, storage_key: row.file_key,
+    mime_type: row.mime_type || '', file_size: row.file_size || 0, status: row.status,
     download_limit: row.download_limit, download_expiry_hours: row.download_expiry_hours,
     version: row.version, created_at: row.created_at, updated_at: row.updated_at
   };
@@ -181,6 +186,14 @@ function orderItems(orderId) {
     unit_price_minor AS price_guarani, currency, quantity FROM order_items WHERE order_id = ?`).all(orderId);
 }
 function customerForOrder(customerId) { return db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId); }
+
+for (const statement of [
+  "ALTER TABLE products ADD COLUMN file_name TEXT NOT NULL DEFAULT ''",
+  "ALTER TABLE products ADD COLUMN mime_type TEXT NOT NULL DEFAULT ''",
+  "ALTER TABLE products ADD COLUMN file_size INTEGER NOT NULL DEFAULT 0"
+]) {
+  try { db.exec(statement); } catch (error) { if (!String(error.message).includes('duplicate column')) throw error; }
+}
 
 function importLegacyJson() {
   const count = db.prepare('SELECT COUNT(*) AS count FROM products').get().count;
@@ -243,6 +256,8 @@ function importLegacyJson() {
   insert();
 }
 importLegacyJson();
+db.prepare(`INSERT OR IGNORE INTO courses (product_id,title,description,created_at,updated_at)
+  SELECT id,name,description,created_at,updated_at FROM products WHERE type='COURSE'`).run();
 
 const repository = {
   getProducts(onlyActive = true) {
@@ -270,6 +285,11 @@ const repository = {
       image_url: data.image_url || '', file_key: data.file_name || '', status: data.status || 'ACTIVE', created_at: timestamp, updated_at: timestamp
     });
     return publicProduct(productById(result.lastInsertRowid));
+  },
+  setProductFile(productId, file) {
+    const result = db.prepare(`UPDATE products SET file_key=?,file_name=?,mime_type=?,file_size=?,updated_at=? WHERE id=?`)
+      .run(file.storage_key, file.filename, file.mime_type, file.size, now(), Number(productId));
+    return result.changes ? publicProduct(productById(productId)) : null;
   },
   createOrder(payload, items) {
     const timestamp = now();
@@ -310,6 +330,43 @@ const repository = {
     return { ...row, total_guarani: row.total_minor, items: orderItems(row.id), delivery: db.prepare('SELECT * FROM digital_deliveries WHERE order_id=?').get(row.id) || null };
   },
   markOrderAsPaid() { return { error: 'Los pagos están bloqueados hasta integrar un proveedor oficial.' }; },
+  createDigitalDeliveries(orderId) {
+    const order = this.getOrderById(orderId);
+    if (!order || !['PAID', 'DELIVERED'].includes(order.status)) return { created: [], error: 'ORDER_NOT_PAID' };
+    const created = [];
+    const transaction = db.transaction(() => {
+      for (const item of order.items) {
+        const product = productById(item.product_id);
+        if (!product || product.type !== 'DOWNLOAD') continue;
+        const existing = db.prepare('SELECT * FROM digital_deliveries WHERE order_id=? AND product_id=?').get(order.id, product.id);
+        if (existing) { created.push({ delivery: existing, token: null, existing: true }); continue; }
+        const token = crypto.randomBytes(32).toString('base64url');
+        const expires = product.download_expiry_hours ? new Date(Date.now() + product.download_expiry_hours * 3600000).toISOString() : null;
+        const result = db.prepare(`INSERT INTO digital_deliveries (order_id,product_id,token_hash,status,expires_at,download_limit,created_at)
+          VALUES (?,?,?,?,?,?,?)`).run(order.id, product.id, hashToken(token), 'ACTIVE', expires, product.download_limit, now());
+        created.push({ delivery: db.prepare('SELECT * FROM digital_deliveries WHERE id=?').get(result.lastInsertRowid), token, existing: false });
+      }
+    });
+    transaction();
+    return { created };
+  },
+  grantCourseAccess(orderId) {
+    const order = this.getOrderById(orderId);
+    if (!order || !['PAID', 'DELIVERED'].includes(order.status)) return { granted: [], error: 'ORDER_NOT_PAID' };
+    const granted = [];
+    const transaction = db.transaction(() => {
+      for (const item of order.items) {
+        const course = db.prepare(`SELECT c.* FROM courses c JOIN products p ON p.id=c.product_id WHERE p.id=? AND p.type='COURSE'`).get(item.product_id);
+        if (!course) continue;
+        const existing = db.prepare('SELECT * FROM course_access WHERE course_id=? AND customer_id=? AND order_id=?').get(course.id, order.customer_id, order.id);
+        if (existing) { granted.push(existing); continue; }
+        const result = db.prepare(`INSERT INTO course_access (course_id,customer_id,order_id,status,created_at) VALUES (?,?,?,?,?)`).run(course.id, order.customer_id, order.id, 'ACTIVE', now());
+        granted.push(db.prepare('SELECT * FROM course_access WHERE id=?').get(result.lastInsertRowid));
+      }
+    });
+    transaction();
+    return { granted };
+  },
   getDeliveryByToken(token) {
     const delivery = db.prepare('SELECT * FROM digital_deliveries WHERE token_hash=?').get(hashToken(token));
     if (!delivery) return null;
@@ -336,8 +393,20 @@ const repository = {
       SUM(CASE WHEN status='PENDING' THEN 1 ELSE 0 END) AS pending_orders_count,
       COALESCE(SUM(CASE WHEN status IN ('PAID','DELIVERED') THEN total_minor ELSE 0 END),0) AS total_income
       FROM orders`).get();
-    return { ...metrics, today_income: 0, month_income: 0, active_products_count: db.prepare("SELECT COUNT(*) AS count FROM products WHERE status='ACTIVE'").get().count, total_downloads_count: db.prepare('SELECT COALESCE(SUM(download_count),0) AS count FROM digital_deliveries').get().count };
-  }
+    return {
+      ...metrics,
+      today_income: 0,
+      month_income: 0,
+      active_products_count: db.prepare("SELECT COUNT(*) AS count FROM products WHERE status='ACTIVE'").get().count,
+      deliveries_count: db.prepare("SELECT COUNT(*) AS count FROM digital_deliveries WHERE status='ACTIVE'").get().count,
+      failed_emails_count: db.prepare("SELECT COUNT(*) AS count FROM email_logs WHERE status='EMAIL_FAILED'").get().count,
+      total_downloads_count: db.prepare('SELECT COALESCE(SUM(download_count),0) AS count FROM digital_deliveries').get().count
+    };
+  },
+  getCustomers() { return db.prepare('SELECT id,full_name,email,phone,country,city,created_at,updated_at FROM customers ORDER BY created_at DESC').all(); },
+  getDeliveries() { return db.prepare('SELECT d.id,d.order_id,d.product_id,d.status,d.expires_at,d.download_limit,d.download_count,d.last_download_at,d.created_at,o.order_code,p.name AS product_name FROM digital_deliveries d JOIN orders o ON o.id=d.order_id JOIN products p ON p.id=d.product_id ORDER BY d.created_at DESC').all(); },
+  getEmailLogs() { return db.prepare('SELECT * FROM email_logs ORDER BY created_at DESC').all(); },
+  getCourses() { return db.prepare('SELECT c.*,p.name AS product_name FROM courses c JOIN products p ON p.id=c.product_id ORDER BY c.created_at DESC').all(); }
 };
 
 module.exports = repository;

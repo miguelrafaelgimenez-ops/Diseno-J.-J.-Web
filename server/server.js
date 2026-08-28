@@ -22,6 +22,13 @@ app.use('/api', apiRoutes);
 
 // Servir archivos estáticos del sitio web (HTML, CSS, JS, Assets, Imagen)
 const rootDir = path.join(__dirname, '..');
+app.use((req, res, next) => {
+  const blocked = ['/storage', '/server', '/.git', '/.env'];
+  if (blocked.some(prefix => req.path === prefix || req.path.startsWith(`${prefix}/`))) {
+    return res.status(404).send('Recurso no encontrado.');
+  }
+  next();
+});
 app.use(express.static(rootDir));
 
 // Manejo de ruta raíz por defecto
